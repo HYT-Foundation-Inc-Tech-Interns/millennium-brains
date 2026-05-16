@@ -34,6 +34,8 @@ import {
   AtSign,
   Hash,
   Play,
+  Hd,
+  Cpu,
 } from "lucide-react";
 import heroImg from "@/assets/millennium tv.png";
 import { Header } from "@/components/site/Header";
@@ -120,15 +122,19 @@ const productFeatures = [
     title: "Wireless Collaboration",
     desc: "Seamless screen sharing and device connectivity",
   },
-  { icon: PenTool, title: "Smart Annotation", desc: "AI-powered note-taking and markup tools" },
+  { icon: Cpu, title: "Embedded OS", desc: "Embedded Windows and Android Operating Systems" },
   { icon: Brain, title: "AI-Powered Meetings", desc: "Intelligent transcription and insights" },
   {
     icon: Presentation,
     title: "Interactive Presentations",
     desc: "Engaging multi-touch experiences",
   },
-  { icon: Workflow, title: "Automation Workflows", desc: "Streamlined business processes" },
-  { icon: Globe, title: "Enterprise Security", desc: "Bank-grade encryption and protection" },
+  { icon: Workflow, title: "Seamless Discussions", desc: "Project your laptop and smartphone" },
+  {
+    icon: Globe,
+    title: "Future-proof System",
+    desc: "Scalable computing capacity through Open Pluggable Specification",
+  },
 ];
 
 const environments = [
@@ -378,8 +384,8 @@ function Hero() {
               className="w-full h-auto "
             />
             <div className="absolute -top-4 -right-4 card-surface px-4 py-3 flex items-center gap-3">
-              <div className="w-9 h-9 rounded-lg bg-emerald-500/20 grid place-items-center">
-                <Zap className="w-4 h-4 text-emerald-400" />
+              <div className="w-9 h-9 rounded-lg bg-gradient-brand grid place-items-center">
+                <Hd className="w-4 h-4 text-primary-foreground" />
               </div>
               <div className="text-xs">
                 <div className="text-muted-foreground">Display</div>
@@ -388,7 +394,7 @@ function Hero() {
             </div>
             <div className="absolute -bottom-4 -left-4 card-surface px-4 py-3 flex items-center gap-3">
               <div className="w-9 h-9 rounded-lg bg-gradient-brand grid place-items-center">
-                <Shield className="w-4 h-4 text-primary-foreground" />
+                <Cpu className="w-4 h-4 text-primary-foreground" />
               </div>
               <div className="text-xs">
                 <div className="text-muted-foreground">Operating System</div>
@@ -512,7 +518,7 @@ function Products() {
         <div className="grid lg:grid-cols-2 gap-8 items-start">
           <div className="card-surface p-3 relative">
             <img
-              src={heroImg}
+              src="https://img.youtube.com/vi/FwzdLd3bSx8/maxresdefault.jpg"
               alt="Millennium Pro Series"
               width={1280}
               height={896}
@@ -520,16 +526,6 @@ function Products() {
               className="w-full h-auto rounded-xl object-cover aspect-[4/3]"
             />
             <div className="absolute top-6 left-6 chip">4K Ultra HD</div>
-            <div className="absolute bottom-6 right-6 card-surface px-4 py-3 text-xs">
-              <div className="flex items-center gap-2">
-                <span className="w-2 h-2 rounded-full bg-emerald-400" />
-                <span className="text-muted-foreground">System Active</span>
-              </div>
-              <div className="font-semibold mt-1">Performance: 99.9%</div>
-              <div className="mt-2 h-1 w-32 rounded-full bg-secondary overflow-hidden">
-                <div className="h-full w-[99%] bg-gradient-brand" />
-              </div>
-            </div>
             <div className="px-3 py-5">
               <h3 className="text-2xl font-bold">Millennium Pro Series</h3>
               <p className="mt-2 text-sm text-muted-foreground">
@@ -537,9 +533,9 @@ function Products() {
               </p>
               <div className="mt-6 grid grid-cols-3 gap-4 text-center">
                 {[
-                  { v: "20+", l: "Touch Points" },
+                  { v: "20", l: "Touch Points" },
                   { v: "4K", l: "Resolution" },
-                  { v: "178°", l: "Viewing Angle" },
+                  { v: "21+", l: "Multi-Language Support" },
                 ].map((m) => (
                   <div key={m.l}>
                     <div className="text-2xl font-bold text-gradient-brand">{m.v}</div>
