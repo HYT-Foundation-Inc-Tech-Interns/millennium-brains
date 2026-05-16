@@ -9,6 +9,7 @@ import {
 } from "@tanstack/react-router";
 
 import appCss from "../styles.css?url";
+import favicon from "@/assets/Logo Millennium Paltinum PNG.png";
 
 function NotFoundComponent() {
   return (
@@ -72,23 +73,21 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Lovable App" },
-      { name: "description", content: "Pixel Perfect Landing transforms static designs into responsive React landing pages with Tailwind CSS." },
-      { name: "author", content: "Lovable" },
-      { property: "og:title", content: "Lovable App" },
-      { property: "og:description", content: "Pixel Perfect Landing transforms static designs into responsive React landing pages with Tailwind CSS." },
-      { property: "og:type", content: "website" },
-      { name: "twitter:card", content: "summary" },
-      { name: "twitter:site", content: "@Lovable" },
-      { name: "twitter:title", content: "Lovable App" },
-      { name: "twitter:description", content: "Pixel Perfect Landing transforms static designs into responsive React landing pages with Tailwind CSS." },
-      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/d415dec8-a406-4702-8173-9049655d535e/id-preview-d3c131c3--84e9a5e5-a8df-4b1e-811a-95349559cd76.lovable.app-1778832995583.png" },
-      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/d415dec8-a406-4702-8173-9049655d535e/id-preview-d3c131c3--84e9a5e5-a8df-4b1e-811a-95349559cd76.lovable.app-1778832995583.png" },
+      {
+        name: "description",
+        content:
+          "Millennium is a leading provider of digital signage solutions, offering cutting-edge technology and innovative displays to transform your visual communication experience.",
+      },
     ],
     links: [
       {
         rel: "stylesheet",
         href: appCss,
+      },
+      {
+        rel: "icon",
+        href: favicon,
+        type: "image/png",
       },
     ],
   }),

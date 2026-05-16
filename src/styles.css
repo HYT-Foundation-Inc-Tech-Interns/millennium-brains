@@ -1,3 +1,4 @@
+@import url("https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700;800&family=Playfair+Display:wght@400;600;700&display=swap");
 @import "tailwindcss" source(none);
 @source "../src";
 @import "tw-animate-css";
@@ -54,8 +55,8 @@
   --popover-foreground: oklch(0.98 0.005 240);
 
   /* Cyan brand */
-  --primary: oklch(0.78 0.15 220);
-  --primary-foreground: oklch(0.16 0.04 264);
+  --primary: #0ce249; /* lime */
+  --primary-foreground: #07210b;
 
   --secondary: oklch(0.27 0.04 264);
   --secondary-foreground: oklch(0.98 0.005 240);
@@ -72,9 +73,9 @@
   --ring: oklch(0.78 0.15 220);
 
   --cyan-glow: oklch(0.82 0.15 215);
-  --blue-glow: oklch(0.62 0.2 255);
+  --blue-glow: #0e5fd8; /* brand blue */
 
-  --gradient-brand: linear-gradient(135deg, oklch(0.82 0.15 215), oklch(0.62 0.2 255));
+  --gradient-brand: linear-gradient(135deg, #0ce249 10%, #0e5fd8 100%);
   --gradient-text: linear-gradient(135deg, oklch(0.85 0.14 210), oklch(0.7 0.18 245));
   --gradient-card: linear-gradient(180deg, oklch(0.22 0.04 264 / 0.6), oklch(0.18 0.04 264 / 0.4));
 
@@ -82,7 +83,7 @@
     linear-gradient(to right, oklch(1 0 0 / 0.04) 1px, transparent 1px),
     linear-gradient(to bottom, oklch(1 0 0 / 0.04) 1px, transparent 1px);
 
-  --shadow-glow: 0 0 40px oklch(0.78 0.15 220 / 0.35);
+  --shadow-glow: 0 8px 40px -6px rgba(12, 226, 73, 0.18), 0 20px 80px -20px rgba(14, 95, 216, 0.12);
   --shadow-card: 0 10px 40px -10px oklch(0.1 0.04 264 / 0.6);
 }
 
@@ -96,8 +97,23 @@
   body {
     background-color: var(--color-background);
     color: var(--color-foreground);
-    font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+    font-family:
+      Montserrat,
+      ui-sans-serif,
+      system-ui,
+      -apple-system,
+      "Segoe UI",
+      sans-serif;
     -webkit-font-smoothing: antialiased;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5 {
+    font-family: "Playfair Display", Georgia, serif;
+    letter-spacing: -0.01em;
   }
 }
 
@@ -124,7 +140,10 @@
   background-image: var(--gradient-brand);
   color: var(--primary-foreground);
   box-shadow: var(--shadow-glow);
-  transition: transform 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease,
+    filter 0.2s ease;
 }
 @utility btn-primary {
   &:hover {
@@ -144,7 +163,9 @@
   color: var(--foreground);
   border: 1px solid var(--border);
   background: transparent;
-  transition: background 0.2s ease, border-color 0.2s ease;
+  transition:
+    background 0.2s ease,
+    border-color 0.2s ease;
 }
 @utility btn-ghost {
   &:hover {
