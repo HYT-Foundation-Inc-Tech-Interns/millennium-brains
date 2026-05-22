@@ -59,6 +59,7 @@ export const Route = createFileRoute("/")({
 
 /* ------------------------------- Data ------------------------------- */
 
+// Powering Innovation Across Industries
 const stats = [
   { value: "500+", label: "Enterprise Clients", icon: Building2 },
   { value: "1000+", label: "Educational Institutions", icon: GraduationCap },
@@ -77,6 +78,7 @@ const partners = [
   { name: "Smart City Council", type: "Government" },
 ];
 
+// Smart Technology Ecosystems
 const solutions = [
   {
     icon: GraduationCap,
@@ -116,6 +118,7 @@ const solutions = [
   },
 ];
 
+// Technology That Empowers
 const productFeatures = [
   {
     icon: Wifi,
@@ -137,6 +140,7 @@ const productFeatures = [
   },
 ];
 
+// Explore Our Smart Environments
 const environments = [
   {
     key: "classroom",
@@ -201,6 +205,7 @@ const environments = [
   },
 ];
 
+// Successful Deployments
 const projectFilters = [
   "All Projects",
   "Schools",
@@ -210,6 +215,7 @@ const projectFilters = [
   "Smart Offices",
 ] as const;
 
+// Images below Successful Deployments
 const projects = [
   {
     tag: "45 Smart Classrooms",
@@ -254,7 +260,7 @@ const projects = [
     img: "https://images.unsplash.com/photo-1519389950473-47ba0277781c?auto=format&fit=crop&w=900&q=80",
   },
 ];
-
+// images below Meet Us at Industry Events
 const events = [
   {
     type: "Exhibition",
@@ -874,7 +880,7 @@ function BookDemo() {
 
             <div>
               <label className="text-sm font-medium">Organization Type</label>
-              <select className="mt-2 w-full bg-input border border-border rounded-lg px-4 py-3 text-sm">
+              <select className="mt-2 w-full bg-input border border-border rounded-lg px-4 py-3 text-sm focus:bg-black focus:outline-none">
                 <option>Select type</option>
                 <option>School</option>
                 <option>University</option>
@@ -884,7 +890,7 @@ function BookDemo() {
             </div>
             <div>
               <label className="text-sm font-medium">Solution Interest</label>
-              <select className="mt-2 w-full bg-input border border-border rounded-lg px-4 py-3 text-sm">
+              <select className="mt-2 w-full bg-input border border-border rounded-lg px-4 py-3 text-sm focus:bg-black focus:outline-none">
                 <option>Select solution</option>
                 {solutions.map((s) => (
                   <option key={s.title}>{s.title}</option>
