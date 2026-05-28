@@ -40,6 +40,8 @@ import {
 import heroImg from "@/assets/millennium tv.png";
 import { Header } from "@/components/site/Header";
 import { SectionHeading } from "@/components/site/SectionHeading";
+import Spline from "@splinetool/react-spline";
+
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -68,14 +70,14 @@ const stats = [
 ];
 
 const partners = [
-  { name: "TechCorp Global", type: "Enterprise" },
-  { name: "State University", type: "Education" },
-  { name: "City Government", type: "Government" },
-  { name: "Innovation Hub", type: "Corporate" },
-  { name: "Global Academy", type: "Education" },
-  { name: "Enterprise Solutions Inc", type: "Enterprise" },
-  { name: "National Institute", type: "Institution" },
-  { name: "Smart City Council", type: "Government" },
+  { name: "TechCorp Global", type: "Enterprise", icon: Building2 },
+  { name: "State University", type: "Education", icon: GraduationCap },
+  { name: "City Government", type: "Government", icon: Building },
+  { name: "Innovation Hub", type: "Corporate", icon: Users },
+  { name: "Global Academy", type: "Education", icon: GraduationCap },
+  { name: "Enterprise Solutions Inc", type: "Enterprise", icon: Building2 },
+  { name: "National Institute", type: "Institution", icon: Shield },
+  { name: "Smart City Council", type: "Government", icon: Building },
 ];
 
 // Smart Technology Ecosystems
@@ -119,6 +121,15 @@ const solutions = [
 ];
 
 // Technology That Empowers
+const gradientPalette = [
+  "from-cyan-400 to-blue-500",
+  "from-teal-400 to-emerald-500",
+  "from-violet-400 to-fuchsia-500",
+  "from-amber-400 to-orange-500",
+  "from-sky-400 to-indigo-500",
+  "from-emerald-400 to-cyan-500",
+];
+
 const productFeatures = [
   {
     icon: Wifi,
@@ -569,47 +580,45 @@ const events = [
     img: "/img/GAWAD.jpg",
   },
   {
-    type: "Co",
+    type: "Expo",
     title: "DICT",
     desc: "Discover the future of workplace collaboration with live product demonstrations and expert panels",
     date: "July 22, 2026",
-    location: "New York City",
-    attendees: "2000+",
+    location: "Cavite, Philippines",
+    attendees: "3000+",
     img: "/img/DICT (1).jpg",
   },
   {
-    type: "Expo",
+    type: "Summit",
     title: "BUREAU OF IMMIGRATION",
-    desc: "Showcasing smart governance and public-sector digital transformation solutions",
+    desc: "Join our immigration network—protect our national borders, explore security systems, and streamline travel processing today!",
     date: "August 10-12, 2026",
-    location: "Washington, DC",
-    attendees: "3000+",
+    location: "Manila, Philippines",
+    attendees: "2000+",
     img: "/img/IMMIG1 (3).jpg",
   },
   {
-    type: "Webinar",
+    type: "Conference",
     title: "DEVELOPMENT ACADEMY OF THE PHILIPPINES",
-    desc: "Live online session exploring automation, AI, and the future of intelligent offices",
+    desc: "Unlock your leadership potential—join our public sector training programs to drive smart national development!",
     date: "September 5, 2026",
-    location: "Online",
-    attendees: "10000+",
+    location: "Pasig City, Philippines",
+    attendees: "5000+",
     img: "/img/DAP (2).jpg",
   },
   {
-    type: "Expo",
-    title: "DEPARTMENT OF AGRARIAN",
-    desc: "Showcasing smart governance and public-sector digital transformation solutions",
+    type: "Convention",
+    title: "DEPARTMENT OF AGRARIAN REFORM",
+    desc: "Support our farmers—join our community programs to help secure land rights and boost food production!",
     date: "August 10-12, 2026",
-    location: "Washington, DC",
-    attendees: "3000+",
+    location: "Quezon City, Philippines",
+    attendees: "5000+",
     img: 
       "/img/AGRARIAN (1).jpg",
-      
-    
-    
+        
   },
   {
-    type: "Expo",
+    type: "Summit",
     title: "DENR",
     desc: "Showcasing smart governance and public-sector digital transformation solutions",
     date: "August 10-12, 2026",
@@ -806,17 +815,27 @@ function Index() {
 function Hero() {
   return (
     <section className="relative overflow-hidden">
-      <div className="absolute inset-0 bg-grid opacity-60" aria-hidden />
-      <div
-        className="absolute -top-40 -left-40 w-[40rem] h-[40rem] rounded-full bg-primary/10 blur-3xl"
-        aria-hidden
-      />
-      <div
-        className="absolute -bottom-40 -right-40 w-[40rem] h-[40rem] rounded-full bg-blue-glow/10 blur-3xl"
-        aria-hidden
-      />
+      {/* <div className="absolute inset-0 bg-grid opacity-60" aria-hidden /> */}
+      <div className="absolute w-full h-full inset-0">
+        <Spline
+          scene="https://prod.spline.design/us3ALejTXl6usHZ7/scene.splinecode"
+          style={{
+            width: "100%",
+            height: "100%",
+            pointerEvents: "auto",
+          }}
+        />
+        {/* Black overlay gradient to hide Spline logo at the bottom */}
+        <div
+          className="pointer-events-none absolute inset-0"
+          style={{
+            background: "linear-gradient(0deg, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.7) 30%, rgba(0,0,0,0.0) 70%)",
+            zIndex: 2,
+          }}
+        />
+      </div>
 
-      <div className="relative mx-auto max-w-7xl px-6 py-20 md:py-28 grid md:grid-cols-2 gap-12 items-center">
+      <div className="relative mx-auto max-w-7xl px-6 py-20 md:py-28 grid md:grid-cols-2 gap-12 items-center" style={{zIndex: 3}}>
         <div>
           <span className="chip">
             <Sparkles className="w-3.5 h-3.5 text-primary" /> Powered by Brains Infinite Innovation
@@ -842,8 +861,8 @@ function Hero() {
           <div className="mt-14 grid grid-cols-3 gap-6 max-w-md">
             {[
               { v: "500+", l: "Enterprise Clients", i: Zap },
-              { v: "1000+", l: "Installations", i: Shield },
-              { v: "50+", l: "Cities Served", i: Sparkles },
+              { v: "100+", l: "Installations", i: Shield },
+              { v: "20+", l: "Cities Served", i: Sparkles },
             ].map((s) => (
               <div key={s.l} className="text-center">
                 <s.i className="w-5 h-5 mx-auto text-primary" />
@@ -919,15 +938,19 @@ function Trust() {
         </div>
 
         <div className="mt-8 grid grid-cols-2 md:grid-cols-4 gap-5">
-          {partners.map((p) => (
-            <div key={p.name} className="card-surface p-6 text-center">
-              <div className="w-11 h-11 rounded-lg bg-secondary grid place-items-center mx-auto text-lg font-bold">
-                {p.name[0]}
+          {partners.map((p) => {
+            const Icon = p.icon;
+
+            return (
+              <div key={p.name} className="card-surface p-6 text-center">
+                <div className="w-11 h-11 rounded-lg bg-secondary grid place-items-center mx-auto text-primary">
+                  <Icon className="w-5 h-5" />
+                </div>
+                <div className="mt-4 font-semibold text-sm">{p.name}</div>
+                <div className="text-xs text-muted-foreground mt-1">{p.type}</div>
               </div>
-              <div className="mt-4 font-semibold text-sm">{p.name}</div>
-              <div className="text-xs text-muted-foreground mt-1">{p.type}</div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
     </section>
@@ -995,8 +1018,8 @@ function Products() {
           subtitle="Experience the future of collaboration with our flagship interactive smart board systems"
         />
 
-        <div className="grid lg:grid-cols-2 gap-8 items-start">
-          <div className="card-surface p-3 relative">
+        <div className="grid lg:grid-cols-2 gap-8 items-stretch">
+          <div className="flex flex-col h-full card-surface p-3 relative">
             <img
               src="https://img.youtube.com/vi/FwzdLd3bSx8/maxresdefault.jpg"
               alt="Millennium Pro Series"
@@ -1006,7 +1029,7 @@ function Products() {
               className="w-full h-auto rounded-xl object-cover aspect-[4/3]"
             />
             <div className="absolute top-6 left-6 chip">4K Ultra HD</div>
-            <div className="px-3 py-5">
+            <div className="px-3 py-5 flex-1 flex flex-col">
               <h3 className="text-2xl font-bold">Millennium Pro Series</h3>
               <p className="mt-2 text-sm text-muted-foreground">
                 Enterprise-grade interactive display with AI-powered collaboration features
@@ -1026,19 +1049,23 @@ function Products() {
             </div>
           </div>
 
-          <div className="grid sm:grid-cols-2 gap-4">
-            {productFeatures.map((f) => (
-              <div
-                key={f.title}
-                className="card-surface p-5 hover:border-primary/30 transition-colors"
-              >
-                <div className="w-10 h-10 rounded-lg bg-primary/10 grid place-items-center">
-                  <f.icon className="w-5 h-5 text-primary" />
+          <div className="flex flex-col h-full">
+            <div className="grid sm:grid-cols-2 gap-4 flex-1">
+              {productFeatures.map((f, index) => (
+                <div
+                  key={f.title}
+                  className="card-surface p-5 h-full hover:border-primary/30 transition-colors flex flex-col"
+                >
+                  <div
+                    className={`w-10 h-10 rounded-lg bg-gradient-to-br ${gradientPalette[index % gradientPalette.length]} grid place-items-center text-white shadow-sm`}
+                  >
+                    <f.icon className="w-5 h-5" />
+                  </div>
+                  <h4 className="mt-4 font-semibold">{f.title}</h4>
+                  <p className="mt-1.5 text-sm text-muted-foreground">{f.desc}</p>
                 </div>
-                <h4 className="mt-4 font-semibold">{f.title}</h4>
-                <p className="mt-1.5 text-sm text-muted-foreground">{f.desc}</p>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
         </div>
       </div>
