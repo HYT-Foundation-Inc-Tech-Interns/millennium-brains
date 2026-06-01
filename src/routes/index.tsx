@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import {
   Sparkles,
   Shield,
@@ -152,6 +152,55 @@ const productFeatures = [
     desc: "Scalable computing capacity through Open Pluggable Specification",
   },
 ];
+
+function useCountUpOnVisible(values: number[]) {
+  const [counts, setCounts] = useState<number[]>(values.map(() => 0));
+  const [hasStarted, setHasStarted] = useState(false);
+  const ref = useRef<HTMLDivElement | null>(null);
+  const targetValuesRef = useRef(values);
+
+  useEffect(() => {
+    if (!ref.current || hasStarted) return;
+
+    const targetValues = targetValuesRef.current;
+    let rafId = 0;
+    let startTime: number | null = null;
+    const duration = 1200;
+
+    const animate = (timestamp: number) => {
+      if (!startTime) startTime = timestamp;
+      const elapsed = Math.min(timestamp - startTime, duration);
+      const nextCounts = targetValues.map((target) => Math.floor(target * (elapsed / duration)));
+      setCounts(nextCounts);
+
+      if (elapsed < duration) {
+        rafId = requestAnimationFrame(animate);
+      } else {
+        setCounts(targetValues);
+        setHasStarted(true);
+      }
+    };
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          observer.disconnect();
+          rafId = requestAnimationFrame(animate);
+        }
+      },
+      { threshold: 0.25 }
+    );
+
+    observer.observe(ref.current);
+
+    return () => {
+      observer.disconnect();
+      cancelAnimationFrame(rafId);
+    };
+  }, [hasStarted]);
+
+  return { ref, counts };
+}
 
 // Explore Our Smart Environments
 const environments = [
@@ -503,9 +552,9 @@ const projects = [
     location: "Makati City, Philippines",
     category: "Corporate",
     images: [
-      "/img/ATO (1).jpg",
-      "/img/ATO (2).jpg",
       "/img/ATO (3).jpg",
+      "/img/ATO (2).jpg",
+      "/img/ATO (1).jpg",
       "/img/ATO (4).jpg",
     ],
   },
@@ -577,6 +626,8 @@ const events = [
     images: [ 
       "/img/IMG_9178.jpeg",
       "/img/AFP2.jpg",
+      "/img/AFP3.jpg",
+      "/img/AFP4.jpg",
     ],
   },
    {
@@ -586,7 +637,13 @@ const events = [
     date: "June 15-17, 2026",
     location: "Quezon City, Philippines",
     attendees: "500+",
-    images: [ "/img/GAWAD.jpg" ],
+    images: [ "/img/GAWAD.jpg",
+            "/img/GAWAD2 (1).jpg",
+            "/img/GAWAD2 (2).jpg",
+            "/img/GAWAD2 (3).jpg",
+            "/img/GAWAD2 (4).jpg",
+
+     ],
   },
   {
     type: "Exposition",
@@ -595,7 +652,9 @@ const events = [
     date: "July 22, 2026",
     location: "Quezon City, Philippines",
     attendees: "3000+",
-    images: [ "/img/DICT (1).jpg" ],
+    images: [ "/img/DICT (1).jpg",
+      "/img/DICT (2).jpg",
+    ],
   },
   {
     type: "Summit",
@@ -604,7 +663,9 @@ const events = [
     date: "August 10-12, 2026",
     location: "Manila, Philippines",
     attendees: "2000+",
-    images: [ "/img/IMMIG1 (3).jpg" ],
+    images: [ "/img/IMMIG1 (3).jpg",
+      "/img/IMMIGP2 (1).jpg",
+     ],
   },
   {
     type: "Conference",
@@ -613,7 +674,10 @@ const events = [
     date: "September 5, 2026",
     location: "Pasig City, Philippines",
     attendees: "5000+",
-    images: [ "/img/DAP (2).jpg" ],
+    images: [ "/img/DAP (2).jpg",
+      "/img/DAP (5).jpg",
+      "/img/DAP (1).jpg",
+     ],
   },
   {
     type: "Convention",
@@ -622,7 +686,10 @@ const events = [
     date: "August 10-12, 2026",
     location: "Quezon City, Philippines",
     attendees: "5000+",
-    images: [ "/img/AGRARIAN.jpg" ] ,
+    images: [ "/img/AGRARIAN.jpg",
+      "/img/AGRARIAN (3).jpg",
+      "/img/AGRARIAN (1).jpg",
+     ] ,
         
   },
   {
@@ -632,7 +699,10 @@ const events = [
     date: "August 10-12, 2026",
     location: "Quezon City, Philippines",
     attendees: "10000+",
-    images: [ "/img/DepartmentNR (3).jpg" ],
+    images: [ "/img/DepartmentNR (3).jpg",
+      "/img/DepartmentNR (5).jpg",
+      "/img/DepartmentNR (1).jpg",
+     ],
   },
   {
     type: "Exposition",
@@ -650,7 +720,10 @@ const events = [
     date: "August 10-12, 2026",
     location: "Cavite, Philippines",
     attendees: "5000+",
-    images: [ "/img/NAVY (4).jpg" ],
+    images: [ "/img/NAVY (5).jpg", 
+      "/img/NAVY (4).jpg",
+      "/img/NAVY (3).jpg",
+     ],
   },
   {
     type: "Exposition",
@@ -659,7 +732,10 @@ const events = [
     date: "August 10-12, 2026",
     location: "Makati City, Philippines",
     attendees: "10000+",
-    images: [ "/img/AYALA (4).jpg" ],
+    images: [ "/img/AYALA (4).jpg", 
+      "/img/AYALA (3).jpg",
+      "/img/AYALA (1).jpg"
+    ],
   },
   {
     type: "Exposition",
@@ -668,7 +744,9 @@ const events = [
     date: "August 10-12, 2026",
     location: "Pasay City, Philippines",
     attendees: "4000+",
-    images: [ "/img/PHARMA.jpg" ],
+    images: [ "/img/PHARMA.jpg",
+      "/img/PHARMA2.jpg",
+     ],
   },
   {
     type: "Exposition",
@@ -677,7 +755,11 @@ const events = [
     date: "August 10-12, 2026",
     location: "Quezon City, Philippines",
     attendees: "5000+",
-    images: [ "/img/BL.jpg" ],
+    images: [ "/img/BL.jpg",
+      "/img/BL2 (1).jpg",
+      "/img/BL2 (2).jpg",
+      "/img/BL2 (3).jpg",
+     ],
   },
    {
     type: "Seminar",
@@ -686,7 +768,9 @@ const events = [
     date: "August 10-12, 2026",
     location: "Quezon City, Philippines",
     attendees: "2000+",
-    images: [ "/img/ETS.jpg" ],
+    images: [ "/img/ETS.jpg",
+      "/img/ETS2.jpg",
+     ],
   },
    
   {
@@ -705,7 +789,9 @@ const events = [
     date: "August 10-12, 2026",
     location: "Santa Ignacia, Tarlac, Philippines",
     attendees: "2000+",
-    images: [ "/img/TSI.png" ],
+    images: [ "/img/TSI.png",
+      "/img/TSI2.jpg",
+     ],
   },
   {
     type: "Exposition",
@@ -741,7 +827,11 @@ const events = [
     date: "August 10-12, 2026",
     location: "Pasay City, Philippines",
     attendees: "10000+",
-    images: [ "/img/HALAL2.jpg" ],
+    images: [ "/img/HALAL2.jpg", 
+      "/img/HALAL3 (1).jpg",
+      "/img/HALAL3 (2).jpg",
+      "/img/HALAL3 (3).jpg",
+     ],
   },
   {
     type: "Ceremony",
@@ -750,7 +840,9 @@ const events = [
     date: "August 10-12, 2026",
     location: "Manila, Philippines",
     attendees: "1000+",
-    images: [ "/img/GUSI.jpg" ],
+    images: [ "/img/GUSI.jpg", 
+      "/img/GUSI2.jpg",
+     ],
   },
   {
     type: "Exposition",
@@ -759,7 +851,11 @@ const events = [
     date: "August 10-12, 2026",
     location: "Dasmariñas, Cavite, Philippines",
     attendees: "5000+",
-    images: [ "/img/CAVITE.jpg" ],
+    images: [ "/img/CAVITE.jpg",
+      "/img/CAVITE2 (1).jpg",
+      "/img/CAVITE2 (2).jpg",
+      "/img/CAVITE2 (3).jpg",
+     ],
   },
   {
     type: "Exposition",
@@ -768,7 +864,11 @@ const events = [
     date: "August 10-12, 2026",
     location: "Washington, DC",
     attendees: "3000+",
-    images: [ "/img/WORLDBEX.jpg" ],
+    images: [ "/img/WORLDBEX.jpg",
+      "/img/WORLDBEX2 (1).jpg",
+      "/img/WORLDBEX2 (2).jpg",
+      "/img/WORLDBEX2 (3).jpg",
+     ],
   },
   {
     type: "Conference",
@@ -777,7 +877,10 @@ const events = [
     date: "August 10-12, 2026",
     location: "Quezon City, Philippines",
     attendees: "2000+",
-    images: [ "/img/WEF.jpg" ],
+    images: [ "/img/WEF.jpg", 
+      "/img/WEF2 (1).jpg",
+      "/img/WEF2 (2).jpg",
+    ],
   },
   {
     type: "Tour",
@@ -789,6 +892,90 @@ const events = [
     images: [ "/img/AYALA.png" ],
   },
 ];
+
+const ArrowIcon = ({ direction }: { direction: "left" | "right" }) => (
+  <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    {direction === "left" ? <path d="M15 18l-6-6 6-6" /> : <path d="M9 18l6-6-6-6" />}
+  </svg>
+);
+
+function EventCard({ event }: { event: (typeof events)[number] }) {
+  const [activeIndex, setActiveIndex] = useState(0);
+  const imageCount = event.images.length;
+
+  const cycleImage = (direction: number) => {
+    setActiveIndex((current) => (current + direction + imageCount) % imageCount);
+  };
+
+  return (
+    <div className="card-surface overflow-hidden flex flex-col h-full">
+      <div className="relative overflow-hidden aspect-[16/9] group">
+        {event.images.map((src, index) => (
+          <img
+            key={`${src}-${index}`}
+            src={src}
+            alt={event.title}
+            loading="lazy"
+            className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-500 ${
+              index === activeIndex ? "opacity-100" : "opacity-0"
+            }`}
+          />
+        ))}
+
+        <div className="absolute inset-x-0 bottom-0 z-20 pointer-events-none opacity-0 translate-y-3 transition-all duration-300 ease-in-out group-hover:opacity-100 group-hover:translate-y-0">
+          <div className="absolute inset-x-0 bottom-0 h-[60px] bg-black/50" />
+          <div className="relative w-full px-4">
+            <div className="h-[60px] flex justify-end items-center gap-3">
+              <button
+                type="button"
+                onClick={() => cycleImage(-1)}
+                className="pointer-events-auto inline-flex h-[32px] w-[32px] items-center justify-center rounded-full text-white/65 transition duration-300 ease-in-out hover:opacity-100 focus:outline-none"
+                aria-label="Previous image"
+              >
+                <ArrowIcon direction="left" />
+              </button>
+
+              <div className="h-[32px] w-px bg-white/65" />
+
+              <button
+                type="button"
+                onClick={() => cycleImage(1)}
+                className="pointer-events-auto inline-flex h-[32px] w-[32px] items-center justify-center rounded-full text-white/65 transition duration-300 ease-in-out hover:opacity-100 focus:outline-none"
+                aria-label="Next image"
+              >
+                <ArrowIcon direction="right" />
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <span className="absolute top-4 right-4 px-3 py-1 rounded-full text-xs font-semibold bg-gradient-brand text-primary-foreground">
+          {event.type}
+        </span>
+        <span className="absolute bottom-4 left-4 z-30 inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs bg-background/70 backdrop-blur">
+          <Users className="w-3.5 h-3.5" /> {event.attendees}
+        </span>
+      </div>
+      <div className="p-6 flex-1 flex flex-col">
+        <h3 className="text-xl font-bold">{event.title}</h3>
+        <p className="mt-2 text-sm text-muted-foreground leading-relaxed">{event.desc}</p>
+        <div className="mt-5 space-y-2.5 text-sm">
+          <div className="flex items-center gap-2.5">
+            <Calendar className="w-4 h-4 text-primary" /> {event.date}
+          </div>
+          <div className="flex items-center gap-2.5">
+            <MapPin className="w-4 h-4 text-primary" /> {event.location}
+          </div>
+        </div>
+        <div className="card-button mt-auto">
+          <a href="#contact" className="btn-primary w-full">
+            Register Now <ExternalLink className="w-4 h-4" />
+          </a>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 const certifications = [
   { icon: Shield, label: "ISO 9001:2015" },
@@ -871,6 +1058,8 @@ function Index() {
 /* ------------------------------ Hero -------------------------------- */
 
 function Hero() {
+  const { ref: heroStatsRef, counts: heroCounts } = useCountUpOnVisible([500, 100, 20]);
+
   return (
     <section className="relative overflow-hidden">
       {/* <div className="absolute inset-0 bg-grid opacity-60" aria-hidden /> */}
@@ -916,31 +1105,34 @@ function Hero() {
             </a>
           </div>
 
-          <div className="mt-14 grid grid-cols-3 gap-6 max-w-md">
-            {[
-              { v: "500+", l: "Enterprise Clients", i: Zap },
-              { v: "100+", l: "Installations", i: Shield },
-              { v: "20+", l: "Cities Served", i: Sparkles },
-            ].map((s) => (
-              <div key={s.l} className="text-center">
-                <s.i className="w-5 h-5 mx-auto text-primary" />
-                <div className="mt-2 text-2xl font-bold">{s.v}</div>
-                <div className="text-xs text-muted-foreground">{s.l}</div>
-              </div>
-            ))}
+          <div ref={heroStatsRef} className="mt-14 grid grid-cols-3 gap-6 max-w-md">
+            <div className="text-center">
+              <Zap className="w-5 h-5 mx-auto text-primary" />
+              <div className="mt-2 text-2xl font-bold">{heroCounts[0]}+</div>
+              <div className="text-xs text-muted-foreground">Enterprise Clients</div>
+            </div>
+            <div className="text-center">
+              <Shield className="w-5 h-5 mx-auto text-primary" />
+              <div className="mt-2 text-2xl font-bold">{heroCounts[1]}+</div>
+              <div className="text-xs text-muted-foreground">Installations</div>
+            </div>
+            <div className="text-center">
+              <Sparkles className="w-5 h-5 mx-auto text-primary" />
+              <div className="mt-2 text-2xl font-bold">{heroCounts[2]}+</div>
+              <div className="text-xs text-muted-foreground">Cities Served</div>
+            </div>
           </div>
         </div>
 
-        <div className="relative overflow-hidden">
-          <div className="e p-3 relative">
-            <img
-              src={heroImg}
-              alt="Glowing circuit board"
-              width={1280}
-              height={896}
-              className="w-full h-auto "
-            />
-            <div className="absolute -top-4 -right-4 card-surface px-4 py-3 flex items-center gap-3">
+        <div className="relative">
+          <img
+            src={heroImg}
+            alt="Glowing circuit board"
+            width={1280}
+            height={896}
+            className="w-full h-auto block"
+          />
+          <div className="absolute -top-4 -right-4 card-surface px-4 py-3 flex items-center gap-3">
               <div className="w-9 h-9 rounded-lg bg-gradient-brand grid place-items-center">
                 <Hd className="w-4 h-4 text-primary-foreground" />
               </div>
@@ -968,9 +1160,57 @@ function Hero() {
 /* ------------------------------ Trust -------------------------------- */
 
 function Trust() {
+  const [counts, setCounts] = useState<number[]>(stats.map(() => 0));
+  const [hasAnimated, setHasAnimated] = useState(false);
+  const sectionRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    if (!sectionRef.current || hasAnimated) return;
+
+    const targetValues = stats.map((stat) => Number(stat.value.replace(/\D/g, "")));
+    const suffixes = stats.map((stat) => (stat.value.match(/\D+$/)?.[0] ?? ""));
+    const duration = 1400;
+    let rafId = 0;
+    let startTime: number | null = null;
+
+    const animate = (time: number) => {
+      if (!startTime) startTime = time;
+      const elapsed = Math.min(time - startTime, duration);
+      const nextValues = targetValues.map((target) => {
+        const progress = elapsed / duration;
+        return Math.floor(target * progress);
+      });
+      setCounts(nextValues);
+
+      if (elapsed < duration) {
+        rafId = requestAnimationFrame(animate);
+      } else {
+        setCounts(targetValues);
+        setHasAnimated(true);
+      }
+    };
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          observer.disconnect();
+          rafId = requestAnimationFrame(animate);
+        }
+      },
+      { threshold: 0.3 }
+    );
+
+    observer.observe(sectionRef.current);
+
+    return () => {
+      observer.disconnect();
+      cancelAnimationFrame(rafId);
+    };
+  }, [hasAnimated]);
+
   return (
     <StarfieldSection className="py-24 ">
-      <div className="mx-auto max-w-7xl px-6 ">
+      <div ref={sectionRef} className="mx-auto max-w-7xl px-6 ">
         <SectionHeading
           chip={
             <>
@@ -984,15 +1224,21 @@ function Trust() {
         />
 
         <div className="grid grid-cols-2 md:grid-cols-4 gap-5">
-          {stats.map((s) => (
-            <div key={s.label} className="card-surface p-6 text-center">
-              <div className="w-11 h-11 rounded-lg bg-primary/10 grid place-items-center mx-auto">
-                <s.icon className="w-5 h-5 text-primary" />
+          {stats.map((s, index) => {
+            const rawValue = Number(s.value.replace(/\D/g, ""));
+            const suffix = s.value.match(/\D+$/)?.[0] ?? "";
+            const displayValue = `${counts[index] > 0 ? counts[index] : 0}${suffix}`;
+
+            return (
+              <div key={s.label} className="card-surface p-6 text-center">
+                <div className="w-11 h-11 rounded-lg bg-primary/10 grid place-items-center mx-auto">
+                  <s.icon className="w-5 h-5 text-primary" />
+                </div>
+                <div className="mt-4 text-3xl font-bold">{hasAnimated ? `${rawValue}${suffix}` : displayValue}</div>
+                <div className="text-sm text-muted-foreground mt-1">{s.label}</div>
               </div>
-              <div className="mt-4 text-3xl font-bold">{s.value}</div>
-              <div className="text-sm text-muted-foreground mt-1">{s.label}</div>
-            </div>
-          ))}
+            );
+          })}
         </div>
 
         <div className="mt-8 grid grid-cols-2 md:grid-cols-4 gap-5">
@@ -1274,39 +1520,7 @@ function Events() {
 
         <div className="grid md:grid-cols-2 gap-6">
           {events.map((e) => (
-            <div key={e.title} className="card-surface overflow-hidden flex flex-col h-full">
-              <div className="relative">
-                <img
-                src={e.images[0]}
-                alt={e.title}
-                loading="lazy"
-                className="w-full aspect-[16/9] object-cover"
-                />
-                <span className="absolute top-4 right-4 px-3 py-1 rounded-full text-xs font-semibold bg-gradient-brand text-primary-foreground">
-                  {e.type}
-                </span>
-                <span className="absolute bottom-4 left-4 inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs bg-background/70 backdrop-blur">
-                  <Users className="w-3.5 h-3.5" /> {e.attendees}
-                </span>
-              </div>
-              <div className="p-6 flex-1 flex flex-col">
-                <h3 className="text-xl font-bold">{e.title}</h3>
-                <p className="mt-2 text-sm text-muted-foreground leading-relaxed">{e.desc}</p>
-                <div className="mt-5 space-y-2.5 text-sm">
-                  <div className="flex items-center gap-2.5">
-                    <Calendar className="w-4 h-4 text-primary" /> {e.date}
-                  </div>
-                  <div className="flex items-center gap-2.5">
-                    <MapPin className="w-4 h-4 text-primary" /> {e.location}
-                  </div>
-                </div>
-                <div className="card-button mt-auto">
-                  <a href="#contact" className="btn-primary w-full">
-                    Register Now <ExternalLink className="w-4 h-4" />
-                  </a>
-                </div>
-              </div>
-            </div>
+            <EventCard key={e.title} event={e} />
           ))}
         </div>
       </div>

@@ -1,6 +1,6 @@
 import { useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { ArrowLeft, ArrowRight, MapPin } from "lucide-react";
+import { MapPin } from "lucide-react";
 
 type Project = {
   tag: string;
@@ -28,6 +28,12 @@ const imageVariants = {
   }),
 };
 
+const ArrowIcon = ({ direction }: { direction: "left" | "right" }) => (
+  <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    {direction === "left" ? <path d="M15 18l-6-6 6-6" /> : <path d="M9 18l6-6-6-6" />}
+  </svg>
+);
+
 export function ProjectCard({ project }: { project: Project }) {
   const [activeIndex, setActiveIndex] = useState(0);
   const directionRef = useRef(1);
@@ -39,11 +45,7 @@ export function ProjectCard({ project }: { project: Project }) {
   };
 
   return (
-    <motion.div
-      className="card-surface overflow-hidden group"
-      whileHover={{ scale: 1.01 }}
-      transition={{ duration: 0.3, ease: "easeOut" }}
-    >
+    <motion.div className="card-surface overflow-hidden group">
       <div className="relative overflow-hidden">
         <AnimatePresence mode="wait">
           <motion.img
@@ -66,31 +68,36 @@ export function ProjectCard({ project }: { project: Project }) {
         </span>
 
         {imageCount > 1 ? (
-          <>
-            <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-              <motion.button
-                type="button"
-                onClick={() => cycleImage(-1)}
-                className="pointer-events-auto inline-flex h-11 w-11 items-center justify-center rounded-md bg-black/60 border border-white/10 text-white shadow-[0_0_30px_rgba(0,0,0,0.25)] backdrop-blur-xl transition duration-300 opacity-0 scale-90 group-hover:opacity-100 group-hover:scale-100 hover:shadow-[0_0_28px_rgba(255,255,255,0.18)] hover:bg-slate-950/80 focus:outline-none"
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-              >
-                <ArrowLeft className="w-5 h-5" />
-              </motion.button>
-            </div>
+          <div className="absolute inset-x-0 bottom-0 z-20 pointer-events-none opacity-0 translate-y-3 transition-all duration-300 ease-in-out group-hover:opacity-100 group-hover:translate-y-0">
+            <div className="absolute inset-x-0 bottom-0 h-[50px] bg-black/50" />
+            <div className="relative w-full px-4">
+              <div className="h-[50px] flex justify-end items-center gap-3">
+                <motion.button
+                  type="button"
+                  onClick={() => cycleImage(-1)}
+                  className="pointer-events-auto inline-flex h-[32px] w-[32px] items-center justify-center rounded-full text-white/65 transition duration-300 ease-in-out hover:opacity-100 focus:outline-none"
+                  whileHover={{ scale: 1.05, opacity: 1 }}
+                  whileTap={{ scale: 0.96 }}
+                  aria-label="Previous image"
+                >
+                  <ArrowIcon direction="left" />
+                </motion.button>
 
-            <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-              <motion.button
-                type="button"
-                onClick={() => cycleImage(1)}
-                className="pointer-events-auto inline-flex h-11 w-11 items-center justify-center rounded-md bg-black/60 border border-white/10 text-white shadow-[0_0_30px_rgba(0,0,0,0.25)] backdrop-blur-xl transition duration-300 opacity-0 scale-90 group-hover:opacity-100 group-hover:scale-100 hover:shadow-[0_0_28px_rgba(255,255,255,0.18)] hover:bg-slate-950/80 focus:outline-none"
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-              >
-                <ArrowRight className="w-5 h-5" />
-              </motion.button>
+                <div className="h-[32px] w-px bg-white/65" />
+
+                <motion.button
+                  type="button"
+                  onClick={() => cycleImage(1)}
+                  className="pointer-events-auto inline-flex h-[32px] w-[32px] items-center justify-center rounded-full text-white/65 transition duration-300 ease-in-out hover:opacity-100 focus:outline-none"
+                  whileHover={{ scale: 1.05, opacity: 1 }}
+                  whileTap={{ scale: 0.96 }}
+                  aria-label="Next image"
+                >
+                  <ArrowIcon direction="right" />
+                </motion.button>
+              </div>
             </div>
-          </>
+          </div>
         ) : null}
       </div>
 
