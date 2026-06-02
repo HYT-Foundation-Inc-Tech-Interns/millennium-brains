@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useRef, useState, type ReactNode } from "react";
+import { motion } from "framer-motion";
 import {
   Sparkles,
   Shield,
@@ -42,7 +43,8 @@ import heroImg from "@/assets/millennium tv.png";
 import { Header } from "@/components/site/Header";
 import { ProjectCard } from "@/components/site/ProjectCard";
 import { SectionHeading } from "@/components/site/SectionHeading";
-import Aurora from "@/components/site/Aurora";
+import Galaxy from "@/components/site/Galaxy";
+import { IntroOverlay } from "@/components/IntroOverlay";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -553,7 +555,7 @@ const events = [
     type: "Military & History Museum",
     title: "ARMED FORCES OF THE PHILIPPINE MUSEUM",
     desc: "The Museum displays historical military hardware and artifacts to honor the bravery of Filipino soldiers. They use the Millennium smart board to display interactive combat timelines and vivid video documentaries for visiting students.",
-    date: "June 15-17, 2026",
+    date: "December 16, 2025",
     location: "Quezon City, Philippines",
     attendees: "5000+",
     images: ["/img/IMG_9178.jpeg", "/img/AFP2.jpg", "/img/AFP3.jpg", "/img/AFP4.jpg"],
@@ -562,7 +564,7 @@ const events = [
     type: "Gala Ceremony",
     title: "ARMED FORCES OF THE PHILIPPINE COMMISSIONED OFFICERS COUNTRY GAWAD AWARDS",
     desc: "This national event gathers public servants, civic leaders, and military heroes to celebrate extraordinary service to the country. Thery use the Millennium smart board to display high-definition tribute videos and nominee profiles during the live ceremony.",
-    date: "June 15-17, 2026",
+    date: "March 22, 2024",
     location: "Quezon City, Philippines",
     attendees: "500+",
     images: [
@@ -577,7 +579,7 @@ const events = [
     type: "Exposition",
     title: "DEPARTMENT OF INFORMATION AND COMMUNICATIONS TECHNOLOGY",
     desc: "This annual government technology gathering showcases the country's latest digital advancements, cybersecurity frameworks, and ICT initiatives. Speakers use the Millennium smart board to deliver highly collaborative software demonstrations and cloud architecture pitch decks.",
-    date: "July 22, 2026",
+    date: "June 7, 2024",
     location: "Quezon City, Philippines",
     attendees: "3000+",
     images: ["/img/DICT (1).jpg", "/img/DICT (2).jpg"],
@@ -586,7 +588,7 @@ const events = [
     type: "Summit",
     title: "BUREAU OF IMMIGRATION",
     desc: "This national security gathering focuses on strengthening border protections, passenger screening protocols, and modernizing travel control systems. Officials use the Millennium smart board to map out real-time international flight statistics and collaborate on global security databases.",
-    date: "August 10-12, 2026",
+    date: "March 23, 2026",
     location: "Manila, Philippines",
     attendees: "2000+",
     images: ["/img/IMMIG1 (3).jpg", "/img/IMMIGP2 (1).jpg"],
@@ -595,7 +597,7 @@ const events = [
     type: "Conference",
     title: "DEVELOPMENT ACADEMY OF THE PHILIPPINES",
     desc: "This conference trains government leaders and public administrators in effective governance, policy creation, and modern management skills. Facilitators use the Millennium smart board to host interactive leadership workshops and build dynamic policy concept maps with the attendees.",
-    date: "September 5, 2026",
+    date: "March 6, 2026",
     location: "Pasig City, Philippines",
     attendees: "5000+",
     images: ["/img/DAP (2).jpg", "/img/DAP (5).jpg", "/img/DAP (1).jpg"],
@@ -604,7 +606,7 @@ const events = [
     type: "Convention",
     title: "DEPARTMENT OF AGRARIAN REFORM",
     desc: "This convention brings together regional directors and farmer representatives to discuss equitable land distribution and rural development programs. Representatives use the Millennium smart board to track regional land titles and map out agricultural supply chains interactively.",
-    date: "August 10-12, 2026",
+    date: "May 7, 2025",
     location: "Quezon City, Philippines",
     attendees: "5000+",
     images: ["/img/AGRARIAN.jpg", "/img/AGRARIAN (3).jpg", "/img/AGRARIAN (1).jpg"],
@@ -613,7 +615,7 @@ const events = [
     type: "Summit",
     title: "DEPARTMENT OF ENVIRONMENT AND NATURAL RESOURCES",
     desc: "This environmental summit coordinates nationwide strategies for wildlife conservation, reforestation, and climate change mitigation. Scientists and policymakers use the Millennium smart board to zoom into high-resolution satellite maps and collaborate on ecosystem data models.",
-    date: "August 10-12, 2026",
+    date: "May 15, 2024",
     location: "Quezon City, Philippines",
     attendees: "10000+",
     images: ["/img/DepartmentNR (3).jpg", "/img/DepartmentNR (5).jpg", "/img/DepartmentNR (1).jpg"],
@@ -622,7 +624,7 @@ const events = [
     type: "Exposition",
     title: "PHILIPPINE CHAMBER OF COMMERCE AND INDUSTRY",
     desc: "The largest business gathering in the country connects entrepreneurs, trade delegates, and global investors to foster economic growth. Corporate executives use the Millennium smart board to deliver interactive investment pitches and run live market analysis projections.",
-    date: "August 10-12, 2026",
+    date: "January 21, 2026",
     location: "Taguig City, Philippines",
     attendees: "5000+",
     images: ["/img/PCCI.jpg"],
@@ -631,7 +633,7 @@ const events = [
     type: "Exhibition",
     title: "PHILIPPINE NAVAL BASE",
     desc: "This military exhibition serves as a hub for discussing maritime security, naval defense tactics, and territorial border patrol logistics. Fleet commanders use the Millennium smart board to run tactical maritime simulations and collaborate on naval defense strategies.",
-    date: "August 10-12, 2026",
+    date: "March 27, 2025",
     location: "Cavite, Philippines",
     attendees: "5000+",
     images: ["/img/NAVY (5).jpg", "/img/NAVY (4).jpg", "/img/NAVY (3).jpg"],
@@ -640,7 +642,7 @@ const events = [
     type: "Exposition",
     title: "AYALA PROPERTIES",
     desc: "This premium real estate exhibition showcases upcoming eco-efficient commercial hubs and luxury residential developments to potential investors. Agents use the Millennium smart board to give clients interactive 3D virtual property tours and review floor plans in real-time.",
-    date: "August 10-12, 2026",
+    date: "March 5, 2026",
     location: "Makati City, Philippines",
     attendees: "10000+",
     images: ["/img/AYALA (4).jpg", "/img/AYALA (3).jpg", "/img/AYALA (1).jpg"],
@@ -649,7 +651,7 @@ const events = [
     type: "Exposition",
     title: "PHILIPPINE PHARMA & HEALTHCARE",
     desc: "This medical convention features the newest advancements in laboratory equipment, pharmaceutical manufacturing, and patient care systems. Researchers use the Millennium smart board to display complex molecular formulas and collaborate on clinical trial data visualizations.",
-    date: "August 10-12, 2026",
+    date: "February 24, 2024",
     location: "Pasay City, Philippines",
     attendees: "4000+",
     images: ["/img/PHARMA.jpg", "/img/PHARMA2.jpg"],
@@ -658,7 +660,7 @@ const events = [
     type: "Exposition",
     title: "BREAD OF LIFE QC",
     desc: "This faith-based exhibition provides a platform for sharing inspirational messages and engaging with the community through interactive multimedia presentations.",
-    date: "August 10-12, 2026",
+    date: "March 23, 2024",
     location: "Quezon City, Philippines",
     attendees: "5000+",
     images: ["/img/BL.jpg", "/img/BL2 (1).jpg", "/img/BL2 (2).jpg", "/img/BL2 (3).jpg"],
@@ -667,7 +669,7 @@ const events = [
     type: "Seminar",
     title: "Elite Teacher",
     desc: "This academic seminar equips top educators with modern pedagogical techniques and digital tools for interactive classrooms. Instructors use the Millennium smart board to model advanced blended-learning lessons and demonstrate collaborative gamified teaching apps.",
-    date: "August 10-12, 2026",
+    date: "July 23, 2024",
     location: "Quezon City, Philippines",
     attendees: "2000+",
     images: ["/img/ETS.jpg", "/img/ETS2.jpg"],
@@ -677,7 +679,7 @@ const events = [
     type: "Conference",
     title: "INNOVATION AI TECH-TALK",
     desc: "This technology conference showcases the latest advancements in artificial intelligence through highly collaborative and engaging presentations.",
-    date: "August 10-12, 2026",
+    date: "May 15, 2024",
     location: "Taguig City, Philippines",
     attendees: "1500+",
     images: ["/img/AYALA.png"],
@@ -686,7 +688,7 @@ const events = [
     type: "Summit",
     title: "TARLAC STA IGNACIA",
     desc: "Municipal officers use the Millennium smart board to present budgeting spreadsheets and receive interactive feedback from the community.",
-    date: "August 10-12, 2026",
+    date: "June 23, 2024",
     location: "Santa Ignacia, Tarlac, Philippines",
     attendees: "2000+",
     images: ["/img/TSI.png", "/img/TSI2.jpg"],
@@ -695,7 +697,7 @@ const events = [
     type: "Exposition",
     title: "TAGAYTAY HIGHLANDS",
     desc: "This exclusive property event showcases luxury mountain resort estates, premium golf course views, and residential vacation homes. Sales directors use the Millennium smart board to illustrate topgraphical maps and map out custom landscape options for prospective buyers.",
-    date: "August 10-12, 2026",
+    date: "June 26, 2024",
     location: "Tagaytay City, Philippines",
     attendees: "3000+",
     images: ["/img/TH.jpg"],
@@ -704,7 +706,7 @@ const events = [
     type: "Exposition",
     title: "TRAVEL SALE",
     desc: "This massive tourism exhibition brings together airlines, cruise lines, and resorts to offer exclusive travel discounts to the public. Travel agencies use the Millennium smart board to display live flight booking calendars and run interactive destination videos for buyers.",
-    date: "August 10-12, 2026",
+    date: "March 28",
     location: "Mandaluyong City, Philippines",
     attendees: "10000+",
     images: ["/img/AYALA.png"],
@@ -713,7 +715,7 @@ const events = [
     type: "Exposition",
     title: "HALAL EVENT (MEGAMALL)",
     desc: " Exhibitors use the Millennium smart board to display food preparation certifications and trace raw ingredient supply chains interactively.Location: Mandaluyong City, Philippines",
-    date: "August 10-12, 2026",
+    date: "September 25, 2025",
     location: "Mandaluyong City, Philippines",
     attendees: "10000+",
     images: ["/img/HALAL.jpg"],
@@ -722,7 +724,7 @@ const events = [
     type: "Exposition",
     title: "HALAL EVENT (WORLD TRADE CENTER)",
     desc: "This international trade exhibition connects global exporters, compliance bodies, and enterprise buyers within the global Halal ecosystem. Trade leaders use the Millennium smart board to sign digital partnerships and deliver international market expansion presentations.",
-    date: "August 10-12, 2026",
+    date: "November 14-16, 2024",
     location: "Pasay City, Philippines",
     attendees: "10000+",
     images: [
@@ -736,7 +738,7 @@ const events = [
     type: "Ceremony",
     title: "GUSI PEACE PRIZE FOUNDATION",
     desc: "This prestigious international awards night honors individuals from across the globe who make outstanding contributions to world peace and human rights. The production team uses the Millennium smart board to display historical global achievements and broadcast live translation feeds.",
-    date: "August 10-12, 2026",
+    date: "November 26, 20",
     location: "Manila, Philippines",
     attendees: "1000+",
     images: ["/img/GUSI.jpg", "/img/GUSI2.jpg"],
@@ -745,7 +747,7 @@ const events = [
     type: "Exposition",
     title: "FIRST CAVITE INDUSTRIAL ESTATE",
     desc: "This industrial assembly brings together manufacturing companies and technology suppliers to discuss automated assembly lines and eco-friendly factories. Plant managers use the Millennium smart board to review factory layouts and interactively streamline shipping logistics.",
-    date: "August 10-12, 2026",
+    date: "February 19, 2026",
     location: "Dasmariñas, Cavite, Philippines",
     attendees: "5000+",
     images: [
@@ -759,8 +761,8 @@ const events = [
     type: "Exposition",
     title: "WORLDBEX (SMX)",
     desc: "The premier building and construction exposition exhibits cutting-edge building materials, architectural designs, and engineering equipment. Architects use the Millennium smart board to zoom into complex blueprints and interactively manipulate 3D structural building models.",
-    date: "August 10-12, 2026",
-    location: "Washington, DC",
+    date: "March 12-15, 2026",
+    location: "Manila, Philippines",
     attendees: "3000+",
     images: [
       "/img/WORLDBEX.jpg",
@@ -773,7 +775,7 @@ const events = [
     type: "Conference",
     title: "WOMEN ECONOMIC FORUM",
     desc: "This forum empowers female entrepreneurs and corporate executives through deep discussions on financial inclusion and economic equality. Speakers use the Millennium smart board to lead interactive financial workshops and build collaborative mentorship networks.",
-    date: "August 10-12, 2026",
+    date: "March 31, 2026",
     location: "Quezon City, Philippines",
     attendees: "2000+",
     images: ["/img/WEF.jpg", "/img/WEF2 (1).jpg", "/img/WEF2 (2).jpg"],
@@ -782,7 +784,7 @@ const events = [
     type: "Tour",
     title: "HISTORIC FREDERICKSBURG FOUNDATION INC.",
     desc: "This preservation event explores colonial heritage sites and historical architectural preservation efforts within the old downtown district. Tour guides use the Millennium smart board to display historical archival photos and compare them side-by-side with modern street views.",
-    date: "August 10-12, 2026",
+    date: "",
     location: "Fredericksburg, United States ",
     attendees: "1000+",
     images: ["/img/AYALA.png"],
@@ -935,34 +937,56 @@ function StarfieldSection({
 }
 
 function Index() {
-  return (
-    <div className="relative min-h-screen overflow-hidden bg-background text-foreground">
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute inset-0 -z-10 overflow-hidden"
-      >
-        <img
-          src="/img/cover.jpg"
-          alt=""
-          className="absolute inset-0 h-full w-full object-cover opacity-35 brightness-[0.65] contrast-[1.05] blur-[1px]"
-        />
-        <div className="absolute inset-0 bg-black/70" />
-        <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(3,7,18,0.65)_0%,rgba(3,7,18,0.72)_35%,rgba(2,6,23,0.86)_100%)]" />
-      </div>
+  const [showIntro, setShowIntro] = useState(true);
 
-      <Header />
-      <main className="relative z-10 pt-16">
-        <Hero />
-        <Trust />
-        <Solutions />
-        <Products />
-        <Showcase />
-        <Portfolio />
-        <Events />
-        <BookDemo />
-      </main>
-      <Footer />
-    </div>
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    const introPlayed = window.sessionStorage.getItem("introPlayed");
+    const forceParam = window.location.search.includes("forceIntro=true");
+
+    if (introPlayed === "true" && !forceParam) {
+      setShowIntro(false);
+    }
+  }, []);
+
+  return (
+    <>
+      {showIntro && <IntroOverlay onComplete={() => setShowIntro(false)} />}
+
+      <motion.div
+        initial={{ opacity: 0, scale: 0.98 }}
+        animate={{ opacity: showIntro ? 0 : 1, scale: showIntro ? 0.98 : 1 }}
+        transition={{ duration: 0.75, ease: "easeOut" }}
+        className="relative min-h-screen overflow-hidden bg-background text-foreground"
+      >
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-0 -z-10 overflow-hidden"
+        >
+          <img
+            src="/img/cover.jpg"
+            alt=""
+            className="absolute inset-0 h-full w-full object-cover opacity-35 brightness-[0.65] contrast-[1.05] blur-[1px]"
+          />
+          <div className="absolute inset-0 bg-black/70" />
+          <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(3,7,18,0.65)_0%,rgba(3,7,18,0.72)_35%,rgba(2,6,23,0.86)_100%)]" />
+        </div>
+
+        <Header />
+        <main className="relative z-10 pt-16">
+          <Hero />
+          <Trust />
+          <Solutions />
+          <Products />
+          <Showcase />
+          <Portfolio />
+          <Events />
+          <BookDemo />
+        </main>
+        <Footer />
+      </motion.div>
+    </>
   );
 }
 
@@ -975,12 +999,12 @@ function Hero() {
     <section className="relative overflow-hidden">
       {/* <div className="absolute inset-0 bg-grid opacity-60" aria-hidden /> */}
       <div className="absolute w-full h-full inset-0">
-        <Aurora
+        <Galaxy
           className="absolute inset-0 pointer-events-none"
-          colorStops={["#7cff67", "#B497CF", "#5227FF"]}
-          blend={0.5}
-          amplitude={1.0}
-          speed={0.5}
+          glowIntensity={0.5}
+          saturation={0.8}
+          hueShift={240}
+          density={1.2}
         />
         <div
           className="pointer-events-none absolute inset-0"
@@ -993,53 +1017,52 @@ function Hero() {
       </div>
 
       <div
-        className="relative mx-auto max-w-7xl px-6 py-20 md:py-28 grid md:grid-cols-2 gap-12 items-center"
-        style={{ zIndex: 3 }}
+        className="relative mx-auto w-full max-w-[1800px] px-[20px] py-20 md:py-28 gap-6 items-center"
+        style={{ zIndex: 3, display: "grid", gridTemplateColumns: "48% 48%" }}
       >
-        <div>
+        <div className="pl-2">
           <span className="chip">
             <Sparkles className="w-3.5 h-3.5 text-primary" /> Powered by Brains Infinite Innovation
             Inc.
           </span>
-          <h1 className="mt-6 text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight leading-[1.05]">
-            The start of <span className="text-white">Modern Day Technology</span>
+          <h1 className="mt-6 text-6xl md:text-7xl lg:text-8xl font-bold tracking-tight leading-[1.02]">
+          The Start of <span className="text-white">Modern Day Technology</span>
           </h1>
-          <p className="mt-6 text-lg text-muted-foreground max-w-xl leading-relaxed">
+          <p className="mt-6 text-lg md:text-xl text-muted-foreground max-w-2xl leading-relaxed">
             Millennium is a smart interactive board that can do presentatiosn in the classroom, the
             confference room, in your home theater or anywhere that requires collaborative and
             engaging presentations
           </p>
           <div className="mt-8 flex flex-wrap gap-4 items-center">
-            <a href="#contact" className="btn-primary">
+            <a href="#contact" className="btn-primary transform-gpu scale-105">
               Book Demo <ArrowRight className="w-4 h-4" />
             </a>
-            <a href="#solutions" className="btn-ghost">
+            <a href="#solutions" className="btn-ghost transform-gpu scale-105">
               Explore Solutions
             </a>
           </div>
-
-          <div ref={heroStatsRef} className="mt-14 grid grid-cols-3 gap-6 max-w-md">
+          <div ref={heroStatsRef} className="mt-14 grid grid-cols-3 gap-6 max-w-lg">
             <div className="text-center">
-              <Zap className="w-5 h-5 mx-auto text-primary" />
-              <div className="mt-2 text-2xl font-bold">{heroCounts[0]}+</div>
+              <Zap className="w-6 h-6 mx-auto text-primary" />
+              <div className="mt-2 text-3xl md:text-4xl font-bold">{heroCounts[0]}+</div>
               <div className="text-xs text-muted-foreground">Enterprise Clients</div>
             </div>
             <div className="text-center">
-              <Shield className="w-5 h-5 mx-auto text-primary" />
-              <div className="mt-2 text-2xl font-bold">{heroCounts[1]}+</div>
+              <Shield className="w-6 h-6 mx-auto text-primary" />
+              <div className="mt-2 text-3xl md:text-4xl font-bold">{heroCounts[1]}+</div>
               <div className="text-xs text-muted-foreground">Installations</div>
             </div>
             <div className="text-center">
-              <Sparkles className="w-5 h-5 mx-auto text-primary" />
-              <div className="mt-2 text-2xl font-bold">{heroCounts[2]}+</div>
+              <Sparkles className="w-6 h-6 mx-auto text-primary" />
+              <div className="mt-2 text-3xl md:text-4xl font-bold">{heroCounts[2]}+</div>
               <div className="text-xs text-muted-foreground">Cities Served</div>
             </div>
           </div>
         </div>
 
-        <div className="relative">
-          <div className="relative p-3 w-full max-w-full">
-            <div className="relative aspect-[16/9] w-full">
+        <div className="relative flex justify-end pr-[10px]">
+          <div className="relative p-3 w-full">
+            <div className="relative aspect-[16/9] w-full origin-right scale-110">
               <img
                 src={heroImg}
                 alt="Glowing circuit board"
@@ -1048,7 +1071,7 @@ function Hero() {
                 className="absolute inset-0 w-full h-full object-contain"
               />
             </div>
-            <div className="absolute -top-4 -right-4 card-surface px-4 py-3 flex items-center gap-3">
+            <div className="absolute -top-6 -right-1 card-surface px-4 py-3 flex items-center gap-3 scale-110">
               <div className="w-9 h-9 rounded-lg bg-gradient-brand grid place-items-center">
                 <Hd className="w-4 h-4 text-primary-foreground" />
               </div>
@@ -1057,7 +1080,7 @@ function Hero() {
                 <div className="font-semibold">4k Ultra HD Display</div>
               </div>
             </div>
-            <div className="absolute -bottom-4 -left-4 card-surface px-4 py-3 flex items-center gap-3">
+            <div className="absolute -bottom-6 -left-25 card-surface px-4 py-3 flex items-center gap-3 scale-110">
               <div className="w-9 h-9 rounded-lg bg-gradient-brand grid place-items-center">
                 <Cpu className="w-4 h-4 text-primary-foreground" />
               </div>

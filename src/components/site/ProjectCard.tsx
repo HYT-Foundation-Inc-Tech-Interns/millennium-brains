@@ -67,7 +67,7 @@ export function ProjectCard({ project }: { project: Project }) {
             initial="enter"
             animate="center"
             exit="exit"
-            transition={{ duration: 0.45, ease: "easeOut" }}
+            transition={{ duration: 0.30, ease: "easeOut" }}
             className="w-full aspect-[4/3] object-cover"
           />
         </AnimatePresence>
