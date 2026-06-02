@@ -38,6 +38,7 @@ import {
   Play,
   Hd,
   Cpu,
+  ChevronDown,
 } from "lucide-react";
 import heroImg from "@/assets/millennium tv.png";
 import { Header } from "@/components/site/Header";
@@ -1256,7 +1257,7 @@ function Products() {
   ];
 
   return (
-    <StarfieldSection id="leasing" className="py-24 border-t border-border">
+    <StarfieldSection id="product" className="py-24 border-t border-border">
       <div className="mx-auto max-w-7xl px-6">
         <SectionHeading
           chip={
@@ -1477,6 +1478,50 @@ function Portfolio() {
 function BookDemo() {
   const [tab, setTab] = useState<"demo" | "lease">("demo");
   const [isSwitching, setIsSwitching] = useState(false);
+  const [shortTermOpen, setShortTermOpen] = useState<"65" | "86" | null>(null);
+  const [monthlyOpen, setMonthlyOpen] = useState<"65" | "86" | null>(null);
+
+  const shortTermSizes = [
+    {
+      id: "65" as const,
+      label: "65 Inches",
+      details: {
+        daily: "Php 6,500",
+        threeDay: "Php 17,500",
+        sevenDay: "Php 35,000",
+      },
+    },
+    {
+      id: "86" as const,
+      label: "86 Inches",
+      details: {
+        daily: "Php 8,500",
+        threeDay: "Php 23,000",
+        sevenDay: "Php 48,000",
+      },
+    },
+  ];
+
+  const monthlySizes = [
+    {
+      id: "65" as const,
+      label: "65 Inches",
+      details: {
+        monthly: "Php 25,000",
+        sixMonth: "Php 23,000/mo",
+        twelveMonth: "Php 21,000/mo",
+      },
+    },
+    {
+      id: "86" as const,
+      label: "86 Inches",
+      details: {
+        monthly: "Php 35,000",
+        sixMonth: "Php 32,000/mo",
+        twelveMonth: "Php 29,000/mo",
+      },
+    },
+  ];
 
   useEffect(() => {
     const activate = (tabName: "lease" | "demo") => {
@@ -1583,70 +1628,112 @@ function BookDemo() {
             <div className="card-surface p-6">
               <div className="text-sm text-muted-foreground mb-4">Lease Pricing</div>
 
-              <div className="overflow-x-auto">
-                <div className="min-w-[640px]">
+              <div className="space-y-8">
+                <section>
                   <h4 className="font-semibold mb-2">SHORT-TERM LEASE (EVENTS / CONFERENCES)</h4>
                   <p className="text-sm text-muted-foreground mb-4">Ideal for hotels and event organizers</p>
 
-                  <table className="w-full text-sm">
-                    <thead>
-                      <tr className="text-xs text-muted-foreground text-left">
-                        <th className="pb-2">Unit Size</th>
-                        <th className="pb-2">Daily Rate (5 hours)</th>
-                        <th className="pb-2">3 Days</th>
-                        <th className="pb-2">7 Days</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-border">
-                      <tr>
-                        <td className="py-3 font-medium">65 inches</td>
-                        <td className="py-3">Php 6,500</td>
-                        <td className="py-3">Php 17,500</td>
-                        <td className="py-3">Php 35,000</td>
-                      </tr>
-                      <tr>
-                        <td className="py-3 font-medium">86 inches</td>
-                        <td className="py-3">Php 8,500</td>
-                        <td className="py-3">Php 23,000</td>
-                        <td className="py-3">Php 48,000</td>
-                      </tr>
-                    </tbody>
-                  </table>
-                </div>
-              </div>
+                  <div className="rounded-3xl border border-border bg-background/50 p-4 mb-6">
+                    <p className="text-xs font-semibold uppercase tracking-[0.25em] text-muted-foreground">
+                      Display Size
+                    </p>
+                    <p className="text-sm text-muted-foreground mt-1">
+                      Choose the Interactive Smart Board size
+                    </p>
+                  </div>
 
-              <div className="border-t border-border my-6" />
+                  <div className="space-y-3">
+                    {shortTermSizes.map((size) => {
+                      const isOpen = shortTermOpen === size.id;
+                      return (
+                        <div key={size.id} className="card-surface border border-border overflow-hidden">
+                          <button
+                            type="button"
+                            onClick={() => setShortTermOpen(isOpen ? null : size.id)}
+                            className="w-full px-5 py-4 flex items-center justify-between gap-3 text-left"
+                          >
+                            <span className="font-semibold">{size.label}</span>
+                            <ChevronDown
+                              className={`w-5 h-5 text-muted-foreground transition-transform duration-300 ${
+                                isOpen ? "rotate-180" : ""
+                              }`}
+                            />
+                          </button>
 
-              <div className="overflow-x-auto">
-                <div className="min-w-[640px]">
+                          {isOpen ? (
+                            <div className="border-t border-border px-5 pb-4 pt-3 space-y-3 text-sm text-muted-foreground">
+                              <div className="flex items-center justify-between">
+                                <span>Daily Rate (5 Hours)</span>
+                                <span className="font-semibold text-foreground">{size.details.daily}</span>
+                              </div>
+                              <div className="flex items-center justify-between">
+                                <span>3-Day Package</span>
+                                <span className="font-semibold text-foreground">{size.details.threeDay}</span>
+                              </div>
+                              <div className="flex items-center justify-between">
+                                <span>7-Day Package</span>
+                                <span className="font-semibold text-foreground">{size.details.sevenDay}</span>
+                              </div>
+                            </div>
+                          ) : null}
+                        </div>
+                      );
+                    })}
+                  </div>
+                </section>
+
+                <section>
                   <h4 className="font-semibold mb-2">MONTHLY LEASE (ORGANIZATIONS / OFFICES)</h4>
                   <p className="text-sm text-muted-foreground mb-4">Enterprise-grade leasing for sustained deployments</p>
 
-                  <table className="w-full text-sm">
-                    <thead>
-                      <tr className="text-xs text-muted-foreground text-left">
-                        <th className="pb-2">Unit Size</th>
-                        <th className="pb-2">Monthly Rate</th>
-                        <th className="pb-2">6 Months Contract</th>
-                        <th className="pb-2">12 Months Contract</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-border">
-                      <tr>
-                        <td className="py-3 font-medium">65 inches</td>
-                        <td className="py-3">Php 25,000</td>
-                        <td className="py-3">Php 23,000/mo</td>
-                        <td className="py-3">Php 21,000/mo</td>
-                      </tr>
-                      <tr>
-                        <td className="py-3 font-medium">86 inches</td>
-                        <td className="py-3">Php 35,000</td>
-                        <td className="py-3">Php 32,000/mo</td>
-                        <td className="py-3">Php 29,000/mo</td>
-                      </tr>
-                    </tbody>
-                  </table>
-                </div>
+                  <div className="rounded-3xl border border-border bg-background/50 p-4 mb-6">
+                    <p className="text-xs font-semibold uppercase tracking-[0.25em] text-muted-foreground">
+                      Display Size
+                    </p>
+                    <p className="text-sm text-muted-foreground mt-1">
+                      Choose the Interactive Smart Board size
+                    </p>
+                  </div>
+
+                  <div className="space-y-3">
+                    {monthlySizes.map((size) => {
+                      const isOpen = monthlyOpen === size.id;
+                      return (
+                        <div key={size.id} className="card-surface border border-border overflow-hidden">
+                          <button
+                            type="button"
+                            onClick={() => setMonthlyOpen(isOpen ? null : size.id)}
+                            className="w-full px-5 py-4 flex items-center justify-between gap-3 text-left"
+                          >
+                            <span className="font-semibold">{size.label}</span>
+                            <ChevronDown
+                              className={`w-5 h-5 text-muted-foreground transition-transform duration-300 ${
+                                isOpen ? "rotate-180" : ""
+                              }`}
+                            />
+                          </button>
+
+                          {isOpen ? (
+                            <div className="border-t border-border px-5 pb-4 pt-3 space-y-3 text-sm text-muted-foreground">
+                              <div className="flex items-center justify-between">
+                                <span>Monthly Rate</span>
+                                <span className="font-semibold text-foreground">{size.details.monthly}</span>
+                              </div>
+                              <div className="flex items-center justify-between">
+                                <span>6-Month Contract</span>
+                                <span className="font-semibold text-foreground">{size.details.sixMonth}</span>
+                              </div>
+                              <div className="flex items-center justify-between">
+                                <span>12-Month Contract</span>
+                                <span className="font-semibold text-foreground">{size.details.twelveMonth}</span>
+                              </div>
+                            </div>
+                          ) : null}
+                        </div>
+                      );
+                    })}
+                  </div>
+                </section>
               </div>
             </div>
           </div>
@@ -1694,10 +1781,18 @@ function BookDemo() {
               />
             </div>
 
-            <button type="submit" className="btn-primary w-full">
-              {tab === "demo" ? "Schedule Demo" : "Request Leasing Info"}{" "}
-              <Send className="w-4 h-4" />
-            </button>
+            {tab === "demo" ? (
+              <button type="submit" className="btn-primary w-full">
+                Schedule Demo <Send className="w-4 h-4" />
+              </button>
+            ) : (
+              <a
+                href="https://connectme-e783f.web.app/"
+                className="btn-primary w-full inline-flex items-center justify-center"
+              >
+                Request Leasing Info <Send className="w-4 h-4" />
+              </a>
+            )}
 
             <p className="text-xs text-center text-muted-foreground">
               By submitting this form, you agree to our privacy policy and terms of service.

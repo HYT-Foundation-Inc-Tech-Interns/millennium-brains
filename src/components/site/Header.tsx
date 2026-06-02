@@ -5,7 +5,7 @@ import millenniumLogo from "@/assets/Logo Millennium Paltinum PNG.png";
 
 const nav = [
   { label: "Solutions", href: "#solutions" },
-  { label: "Leasing", href: "#leasing" },
+  { label: "Product", href: "#product" },
   { label: "Use Cases", href: "#use-cases" },
   { label: "Events", href: "#events" },
   { label: "Contact Us", href: "#footer-contact" },
