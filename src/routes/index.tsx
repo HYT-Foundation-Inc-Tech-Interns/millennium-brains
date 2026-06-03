@@ -1,3 +1,4 @@
+cd "c:\Users\Romel\OneDrive\Documents\Sample\design-to-web-hug"
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { motion } from "framer-motion";
@@ -937,6 +938,36 @@ function StarfieldSection({
 function Index() {
   const [showIntro, setShowIntro] = useState(true);
 
+  const [selectedShortTermSize, setSelectedShortTermSize] = useState<"65" | "86" | null>(null);
+  const [selectedMonthlySize, setSelectedMonthlySize] = useState<"65" | "86" | null>(null);
+  const [showShortTermSelector, setShowShortTermSelector] = useState(false);
+  const [showMonthlySelector, setShowMonthlySelector] = useState(false);
+  const shortTermSelectorRef = useRef<HTMLDivElement | null>(null);
+  const monthlySelectorRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as Node;
+      if (
+        showShortTermSelector &&
+        shortTermSelectorRef.current &&
+        !shortTermSelectorRef.current.contains(target)
+      ) {
+        setShowShortTermSelector(false);
+      }
+      if (
+        showMonthlySelector &&
+        monthlySelectorRef.current &&
+        !monthlySelectorRef.current.contains(target)
+      ) {
+        setShowMonthlySelector(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [showShortTermSelector, showMonthlySelector]);
+
   useEffect(() => {
     if (typeof window === "undefined") return;
 
@@ -980,7 +1011,18 @@ function Index() {
           <Showcase />
           <Events />
           <Portfolio />
-          <BookDemo />
+          <BookDemo
+            selectedShortTermSize={selectedShortTermSize}
+            setSelectedShortTermSize={setSelectedShortTermSize}
+            selectedMonthlySize={selectedMonthlySize}
+            setSelectedMonthlySize={setSelectedMonthlySize}
+            showShortTermSelector={showShortTermSelector}
+            setShowShortTermSelector={setShowShortTermSelector}
+            showMonthlySelector={showMonthlySelector}
+            setShowMonthlySelector={setShowMonthlySelector}
+            shortTermSelectorRef={shortTermSelectorRef}
+            monthlySelectorRef={monthlySelectorRef}
+          />
         </main>
         <Footer />
       </motion.div>
@@ -1475,11 +1517,31 @@ function Portfolio() {
 
 /* ----------------------------- Book Demo ----------------------------- */
 
-function BookDemo() {
+function BookDemo({
+  selectedShortTermSize,
+  setSelectedShortTermSize,
+  selectedMonthlySize,
+  setSelectedMonthlySize,
+  showShortTermSelector,
+  setShowShortTermSelector,
+  showMonthlySelector,
+  setShowMonthlySelector,
+  shortTermSelectorRef,
+  monthlySelectorRef,
+}: {
+  selectedShortTermSize: "65" | "86" | null;
+  setSelectedShortTermSize: React.Dispatch<React.SetStateAction<"65" | "86" | null>>;
+  selectedMonthlySize: "65" | "86" | null;
+  setSelectedMonthlySize: React.Dispatch<React.SetStateAction<"65" | "86" | null>>;
+  showShortTermSelector: boolean;
+  setShowShortTermSelector: React.Dispatch<React.SetStateAction<boolean>>;
+  showMonthlySelector: boolean;
+  setShowMonthlySelector: React.Dispatch<React.SetStateAction<boolean>>;
+  shortTermSelectorRef: React.RefObject<HTMLDivElement | null>;
+  monthlySelectorRef: React.RefObject<HTMLDivElement | null>;
+}) {
   const [tab, setTab] = useState<"demo" | "lease">("demo");
   const [isSwitching, setIsSwitching] = useState(false);
-  const [shortTermOpen, setShortTermOpen] = useState<"65" | "86" | null>(null);
-  const [monthlyOpen, setMonthlyOpen] = useState<"65" | "86" | null>(null);
 
   const shortTermSizes = [
     {
@@ -1551,6 +1613,8 @@ function BookDemo() {
     };
   }, []);
 
+  
+
   return (
     <StarfieldSection id="contact" className="py-24 border-t border-border">
       {/* Anchor target for Lease Now smooth scroll. scrollMarginTop prevents header overlap */}
@@ -1579,7 +1643,7 @@ function BookDemo() {
                     : ""
                 } ${isSwitching && tab !== "demo" ? "opacity-80 scale-95" : ""}`}
               >
-                <Calendar className="w-6 h-6 mx-auto" />
+                <Calendar className="w-3 h-3 mx-auto" />
                 <div className="mt-3 font-semibold">Book Demo</div>
                 <div className="text-xs opacity-80 mt-1">Live Product Tour</div>
               </button>
@@ -1633,7 +1697,7 @@ function BookDemo() {
                   <h4 className="font-semibold mb-2">SHORT-TERM LEASE (EVENTS / CONFERENCES)</h4>
                   <p className="text-sm text-muted-foreground mb-4">Ideal for hotels and event organizers</p>
 
-                  <div className="rounded-3xl border border-border bg-background/50 p-4 mb-6">
+                  <div className="rounded-3xl border border-border bg-background/50 p-4 mb-4">
                     <p className="text-xs font-semibold uppercase tracking-[0.25em] text-muted-foreground">
                       Display Size
                     </p>
@@ -1642,51 +1706,88 @@ function BookDemo() {
                     </p>
                   </div>
 
-                  <div className="space-y-3">
-                    {shortTermSizes.map((size) => {
-                      const isOpen = shortTermOpen === size.id;
-                      return (
-                        <div key={size.id} className="card-surface border border-border overflow-hidden">
-                          <button
-                            type="button"
-                            onClick={() => setShortTermOpen(isOpen ? null : size.id)}
-                            className="w-full px-5 py-4 flex items-center justify-between gap-3 text-left"
-                          >
-                            <span className="font-semibold">{size.label}</span>
-                            <ChevronDown
-                              className={`w-5 h-5 text-muted-foreground transition-transform duration-300 ${
-                                isOpen ? "rotate-180" : ""
-                              }`}
-                            />
-                          </button>
+                  <div ref={shortTermSelectorRef} className="relative inline-flex items-center">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setShowShortTermSelector((value) => !value);
+                        setShowMonthlySelector(false);
+                      }}
+                      className="card-surface inline-flex items-center justify-between gap-4 rounded-3xl border border-border px-4 py-3 text-left shadow-none"
+                    >
+                      <div className="flex flex-col">
+                        <span className="text-sm font-semibold text-foreground">
+                          {selectedShortTermSize ? `${selectedShortTermSize} Inches` : "Select Smart Board Size"}
+                        </span>
+                        <span className="text-xs text-muted-foreground">Select Smart Board Size</span>
+                      </div>
+                      <span className="text-xs text-muted-foreground">▼</span>
+                    </button>
 
-                          {isOpen ? (
-                            <div className="border-t border-border px-5 pb-4 pt-3 space-y-3 text-sm text-muted-foreground">
-                              <div className="flex items-center justify-between">
-                                <span>Daily Rate (5 Hours)</span>
-                                <span className="font-semibold text-foreground">{size.details.daily}</span>
-                              </div>
-                              <div className="flex items-center justify-between">
-                                <span>3-Day Package</span>
-                                <span className="font-semibold text-foreground">{size.details.threeDay}</span>
-                              </div>
-                              <div className="flex items-center justify-between">
-                                <span>7-Day Package</span>
-                                <span className="font-semibold text-foreground">{size.details.sevenDay}</span>
-                              </div>
-                            </div>
-                          ) : null}
+                    {showShortTermSelector ? (
+                      <div className="card-surface absolute left-full top-1/2 z-20 ml-3 w-auto -translate-y-1/2 border border-border px-3 py-2 shadow-lg">
+                        <div className="flex gap-2">
+                          {shortTermSizes.map((size) => (
+                            <button
+                              key={size.id}
+                              type="button"
+                              onClick={() => {
+                                setSelectedShortTermSize(size.id);
+                                setShowShortTermSelector(false);
+                              }}
+                              className={`rounded-full border px-3 py-2 text-sm font-semibold transition ${
+                                selectedShortTermSize === size.id
+                                  ? "border-primary text-foreground bg-primary/5"
+                                  : "border-border text-muted-foreground bg-background"
+                              }`}
+                            >
+                              {size.label}
+                            </button>
+                          ))}
                         </div>
-                      );
-                    })}
+                      </div>
+                    ) : null}
                   </div>
+
+                  {selectedShortTermSize ? (
+                    <motion.div
+                      key={selectedShortTermSize}
+                      initial={{ opacity: 0, y: -8 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.25 }}
+                      className="overflow-x-auto"
+                    >
+                      <table className="w-full min-w-[520px] text-sm">
+                        <thead>
+                          <tr className="text-xs text-muted-foreground text-left">
+                            <th className="pb-2">Unit Size</th>
+                            <th className="pb-2">Daily Rate (5 Hours)</th>
+                            <th className="pb-2">3 Days</th>
+                            <th className="pb-2">7 Days</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-border">
+                          {shortTermSizes
+                            .filter((size) => size.id === selectedShortTermSize)
+                            .map((size) => (
+                              <tr key={size.id}>
+                                <td className="py-3 font-medium">{size.label}</td>
+                                <td className="py-3">{size.details.daily}</td>
+                                <td className="py-3">{size.details.threeDay}</td>
+                                <td className="py-3">{size.details.sevenDay}</td>
+                              </tr>
+                            ))}
+                        </tbody>
+                      </table>
+                    </motion.div>
+                  ) : null}
                 </section>
 
                 <section>
                   <h4 className="font-semibold mb-2">MONTHLY LEASE (ORGANIZATIONS / OFFICES)</h4>
                   <p className="text-sm text-muted-foreground mb-4">Enterprise-grade leasing for sustained deployments</p>
 
-                  <div className="rounded-3xl border border-border bg-background/50 p-4 mb-6">
+                  <div className="rounded-3xl border border-border bg-background/50 p-4 mb-4">
                     <p className="text-xs font-semibold uppercase tracking-[0.25em] text-muted-foreground">
                       Display Size
                     </p>
@@ -1695,44 +1796,81 @@ function BookDemo() {
                     </p>
                   </div>
 
-                  <div className="space-y-3">
-                    {monthlySizes.map((size) => {
-                      const isOpen = monthlyOpen === size.id;
-                      return (
-                        <div key={size.id} className="card-surface border border-border overflow-hidden">
-                          <button
-                            type="button"
-                            onClick={() => setMonthlyOpen(isOpen ? null : size.id)}
-                            className="w-full px-5 py-4 flex items-center justify-between gap-3 text-left"
-                          >
-                            <span className="font-semibold">{size.label}</span>
-                            <ChevronDown
-                              className={`w-5 h-5 text-muted-foreground transition-transform duration-300 ${
-                                isOpen ? "rotate-180" : ""
-                              }`}
-                            />
-                          </button>
+                  <div ref={monthlySelectorRef} className="relative inline-flex items-center">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setShowMonthlySelector((value) => !value);
+                        setShowShortTermSelector(false);
+                      }}
+                      className="card-surface inline-flex items-center justify-between gap-4 rounded-3xl border border-border px-4 py-3 text-left shadow-none"
+                    >
+                      <div className="flex flex-col">
+                        <span className="text-sm font-semibold text-foreground">
+                          {selectedMonthlySize ? `${selectedMonthlySize} Inches` : "Select Smart Board Size"}
+                        </span>
+                        <span className="text-xs text-muted-foreground">Select Smart Board Size</span>
+                      </div>
+                      <span className="text-xs text-muted-foreground">▼</span>
+                    </button>
 
-                          {isOpen ? (
-                            <div className="border-t border-border px-5 pb-4 pt-3 space-y-3 text-sm text-muted-foreground">
-                              <div className="flex items-center justify-between">
-                                <span>Monthly Rate</span>
-                                <span className="font-semibold text-foreground">{size.details.monthly}</span>
-                              </div>
-                              <div className="flex items-center justify-between">
-                                <span>6-Month Contract</span>
-                                <span className="font-semibold text-foreground">{size.details.sixMonth}</span>
-                              </div>
-                              <div className="flex items-center justify-between">
-                                <span>12-Month Contract</span>
-                                <span className="font-semibold text-foreground">{size.details.twelveMonth}</span>
-                              </div>
-                            </div>
-                          ) : null}
+                    {showMonthlySelector ? (
+                      <div className="card-surface absolute left-full top-1/2 z-20 ml-3 w-auto -translate-y-1/2 border border-border px-3 py-2 shadow-lg">
+                        <div className="flex gap-2">
+                          {monthlySizes.map((size) => (
+                            <button
+                              key={size.id}
+                              type="button"
+                              onClick={() => {
+                                setSelectedMonthlySize(size.id);
+                                setShowMonthlySelector(false);
+                              }}
+                              className={`rounded-full border px-3 py-2 text-sm font-semibold transition ${
+                                selectedMonthlySize === size.id
+                                  ? "border-primary text-foreground bg-primary/5"
+                                  : "border-border text-muted-foreground bg-background"
+                              }`}
+                            >
+                              {size.label}
+                            </button>
+                          ))}
                         </div>
-                      );
-                    })}
+                      </div>
+                    ) : null}
                   </div>
+
+                  {selectedMonthlySize ? (
+                    <motion.div
+                      key={selectedMonthlySize}
+                      initial={{ opacity: 0, y: -8 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.25 }}
+                      className="overflow-x-auto"
+                    >
+                      <table className="w-full min-w-[520px] text-sm">
+                        <thead>
+                          <tr className="text-xs text-muted-foreground text-left">
+                            <th className="pb-2">Unit Size</th>
+                            <th className="pb-2">Monthly Rate</th>
+                            <th className="pb-2">6 Months Contract</th>
+                            <th className="pb-2">12 Months Contract</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-border">
+                          {monthlySizes
+                            .filter((size) => size.id === selectedMonthlySize)
+                            .map((size) => (
+                              <tr key={size.id}>
+                                <td className="py-3 font-medium">{size.label}</td>
+                                <td className="py-3">{size.details.monthly}</td>
+                                <td className="py-3">{size.details.sixMonth}</td>
+                                <td className="py-3">{size.details.twelveMonth}</td>
+                              </tr>
+                            ))}
+                        </tbody>
+                      </table>
+                    </motion.div>
+                  ) : null}
                 </section>
               </div>
             </div>
