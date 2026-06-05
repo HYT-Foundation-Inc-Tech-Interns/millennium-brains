@@ -1,4 +1,3 @@
-cd "c:\Users\Romel\OneDrive\Documents\Sample\design-to-web-hug"
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { motion } from "framer-motion";
@@ -47,6 +46,7 @@ import { ProjectCard } from "@/components/site/ProjectCard";
 import { SectionHeading } from "@/components/site/SectionHeading";
 import Galaxy from "@/components/site/Galaxy";
 import { IntroOverlay } from "@/components/IntroOverlay";
+import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "@/components/ui/accordion";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -1542,6 +1542,62 @@ function BookDemo({
 }) {
   const [tab, setTab] = useState<"demo" | "lease">("demo");
   const [isSwitching, setIsSwitching] = useState(false);
+  const [termsOpen, setTermsOpen] = useState(false);
+  const leaseSectionRef = useRef<HTMLDivElement | null>(null);
+  const termsSectionRef = useRef<HTMLDivElement | null>(null);
+
+  const closeAllDropdowns = () => {
+    setShowShortTermSelector(false);
+    setShowMonthlySelector(false);
+  };
+
+  useEffect(() => {
+    const handlePointerDown = (event: MouseEvent | TouchEvent) => {
+      const target = event.target as Node;
+      const isInsideDropdown =
+        (shortTermSelectorRef.current && shortTermSelectorRef.current.contains(target)) ||
+        (monthlySelectorRef.current && monthlySelectorRef.current.contains(target));
+
+      if ((showShortTermSelector || showMonthlySelector) && !isInsideDropdown) {
+        closeAllDropdowns();
+      }
+
+      if (termsOpen && termsSectionRef.current && !termsSectionRef.current.contains(target)) {
+        setTermsOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handlePointerDown);
+    document.addEventListener("touchstart", handlePointerDown);
+
+    return () => {
+      document.removeEventListener("mousedown", handlePointerDown);
+      document.removeEventListener("touchstart", handlePointerDown);
+    };
+  }, [showShortTermSelector, showMonthlySelector, termsOpen]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    const handleScroll = () => {
+      if (leaseSectionRef.current) {
+        const rect = leaseSectionRef.current.getBoundingClientRect();
+        if (rect.bottom < 96 || rect.top > window.innerHeight - 96) {
+          closeAllDropdowns();
+        }
+      }
+
+      if (termsOpen && termsSectionRef.current) {
+        const rect = termsSectionRef.current.getBoundingClientRect();
+        if (rect.bottom < 96 || rect.top > window.innerHeight - 96) {
+          setTermsOpen(false);
+        }
+      }
+    };
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [termsOpen]);
 
   const shortTermSizes = [
     {
@@ -1616,11 +1672,13 @@ function BookDemo({
   
 
   return (
-    <StarfieldSection id="contact" className="py-24 border-t border-border">
-      {/* Anchor target for Lease Now smooth scroll. scrollMarginTop prevents header overlap */}
-      <div id="leasing-inquiry-section" style={{ scrollMarginTop: "96px" }} />
-      <div className="absolute inset-0 bg-grid opacity-40" aria-hidden />
-      <div className="relative mx-auto max-w-7xl px-6">
+  <StarfieldSection id="contact" className="py-24 border-t border-border">
+    <div id="leasing-inquiry-section" style={{ scrollMarginTop: "96px" }} />
+    <div className="absolute inset-0 bg-grid opacity-40" aria-hidden />
+    <div className="relative mx-auto max-w-7xl px-6">
+
+  </div>
+        
         <SectionHeading
           chip={
             <>
@@ -1689,22 +1747,13 @@ function BookDemo({
               </div>
             ))}
 
-            <div className="card-surface p-6">
+            <div ref={leaseSectionRef} className="card-surface p-6">
               <div className="text-sm text-muted-foreground mb-4">Lease Pricing</div>
 
               <div className="space-y-8">
                 <section>
                   <h4 className="font-semibold mb-2">SHORT-TERM LEASE (EVENTS / CONFERENCES)</h4>
                   <p className="text-sm text-muted-foreground mb-4">Ideal for hotels and event organizers</p>
-
-                  <div className="rounded-3xl border border-border bg-background/50 p-4 mb-4">
-                    <p className="text-xs font-semibold uppercase tracking-[0.25em] text-muted-foreground">
-                      Display Size
-                    </p>
-                    <p className="text-sm text-muted-foreground mt-1">
-                      Choose the Interactive Smart Board size
-                    </p>
-                  </div>
 
                   <div ref={shortTermSelectorRef} className="relative inline-flex items-center">
                     <button
@@ -1755,15 +1804,15 @@ function BookDemo({
                       initial={{ opacity: 0, y: -8 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ duration: 0.25 }}
-                      className="overflow-x-auto"
+                      
                     >
-                      <table className="w-full min-w-[520px] text-sm">
+                      <table className="w-full min-w-[720px] text-sm border-separate border-spacing-x-4">
                         <thead>
-                          <tr className="text-xs text-muted-foreground text-left">
-                            <th className="pb-2">Unit Size</th>
-                            <th className="pb-2">Daily Rate (5 Hours)</th>
-                            <th className="pb-2">3 Days</th>
-                            <th className="pb-2">7 Days</th>
+                          <tr className="text-xs text-muted-foreground text-left uppercase tracking-[0.03em]">
+                            <th className="whitespace-nowrap px-4 py-3 font-semibold">Unit Size</th>
+                            <th className="whitespace-nowrap px-4 py-3 font-semibold">Daily Rate (5 Hours)</th>
+                            <th className="whitespace-nowrap px-4 py-3 font-semibold">3 Days</th>
+                            <th className="whitespace-nowrap px-4 py-3 font-semibold">7 Days</th>
                           </tr>
                         </thead>
                         <tbody className="divide-y divide-border">
@@ -1771,10 +1820,10 @@ function BookDemo({
                             .filter((size) => size.id === selectedShortTermSize)
                             .map((size) => (
                               <tr key={size.id}>
-                                <td className="py-3 font-medium">{size.label}</td>
-                                <td className="py-3">{size.details.daily}</td>
-                                <td className="py-3">{size.details.threeDay}</td>
-                                <td className="py-3">{size.details.sevenDay}</td>
+                                <td className="px-4 py-4 font-medium">{size.label}</td>
+                                <td className="px-4 py-4">{size.details.daily}</td>
+                                <td className="px-4 py-4">{size.details.threeDay}</td>
+                                <td className="px-4 py-4">{size.details.sevenDay}</td>
                               </tr>
                             ))}
                         </tbody>
@@ -1786,15 +1835,6 @@ function BookDemo({
                 <section>
                   <h4 className="font-semibold mb-2">MONTHLY LEASE (ORGANIZATIONS / OFFICES)</h4>
                   <p className="text-sm text-muted-foreground mb-4">Enterprise-grade leasing for sustained deployments</p>
-
-                  <div className="rounded-3xl border border-border bg-background/50 p-4 mb-4">
-                    <p className="text-xs font-semibold uppercase tracking-[0.25em] text-muted-foreground">
-                      Display Size
-                    </p>
-                    <p className="text-sm text-muted-foreground mt-1">
-                      Choose the Interactive Smart Board size
-                    </p>
-                  </div>
 
                   <div ref={monthlySelectorRef} className="relative inline-flex items-center">
                     <button
@@ -1845,15 +1885,15 @@ function BookDemo({
                       initial={{ opacity: 0, y: -8 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ duration: 0.25 }}
-                      className="overflow-x-auto"
+                      
                     >
-                      <table className="w-full min-w-[520px] text-sm">
+                      <table className="w-full min-w-[720px] text-sm border-separate border-spacing-x-4">
                         <thead>
-                          <tr className="text-xs text-muted-foreground text-left">
-                            <th className="pb-2">Unit Size</th>
-                            <th className="pb-2">Monthly Rate</th>
-                            <th className="pb-2">6 Months Contract</th>
-                            <th className="pb-2">12 Months Contract</th>
+                          <tr className="text-xs text-muted-foreground text-left uppercase tracking-[0.03em]">
+                            <th className="whitespace-nowrap px-4 py-3 font-semibold">Unit Size</th>
+                            <th className="whitespace-nowrap px-4 py-3 font-semibold">Monthly Rate</th>
+                            <th className="whitespace-nowrap px-4 py-3 font-semibold">6 Months Contract</th>
+                            <th className="whitespace-nowrap px-4 py-3 font-semibold">12 Months Contract</th>
                           </tr>
                         </thead>
                         <tbody className="divide-y divide-border">
@@ -1861,10 +1901,10 @@ function BookDemo({
                             .filter((size) => size.id === selectedMonthlySize)
                             .map((size) => (
                               <tr key={size.id}>
-                                <td className="py-3 font-medium">{size.label}</td>
-                                <td className="py-3">{size.details.monthly}</td>
-                                <td className="py-3">{size.details.sixMonth}</td>
-                                <td className="py-3">{size.details.twelveMonth}</td>
+                                <td className="px-4 py-4 font-medium">{size.label}</td>
+                                <td className="px-4 py-4">{size.details.monthly}</td>
+                                <td className="px-4 py-4">{size.details.sixMonth}</td>
+                                <td className="px-4 py-4">{size.details.twelveMonth}</td>
                               </tr>
                             ))}
                         </tbody>
@@ -1920,13 +1960,24 @@ function BookDemo({
             </div>
 
             {tab === "demo" ? (
-              <button type="submit" className="btn-primary w-full">
+              <button
+                type="submit"
+                className="btn-primary w-full"
+                onClick={() => {
+                  closeAllDropdowns();
+                  setTermsOpen(false);
+                }}
+              >
                 Schedule Demo <Send className="w-4 h-4" />
               </button>
             ) : (
               <a
                 href="https://connectme-e783f.web.app/"
                 className="btn-primary w-full inline-flex items-center justify-center"
+                onClick={() => {
+                  closeAllDropdowns();
+                  setTermsOpen(false);
+                }}
               >
                 Request Leasing Info <Send className="w-4 h-4" />
               </a>
@@ -1936,6 +1987,128 @@ function BookDemo({
               By submitting this form, you agree to our privacy policy and terms of service.
             </p>
           </form>
+
+          <div ref={termsSectionRef} className="lg:col-span-2">
+  <div className="card-surface p-6 mt-6 rounded-3xl border border-border">
+    <Accordion
+      type="single"
+      collapsible
+      value={termsOpen ? "terms" : ""}
+      onValueChange={(value) => setTermsOpen(value === "terms")}
+    >
+      <AccordionItem value="terms" className="border-0">
+        <AccordionTrigger className="w-full rounded-3xl p-6 text-left hover:no-underline [&>svg]:hidden">
+          <div className="flex w-full flex-col gap-4">
+            <div className="space-y-2">
+              <div className="text-sm font-semibold text-foreground">
+                TERMS AND CONDITIONS
+              </div>
+              <p className="text-sm text-muted-foreground max-w-3xl">
+                Review the booking and payment policies before submitting your inquiry.
+              </p>
+            </div>
+
+            <div className="text-right text-sm font-semibold text-primary">
+              {termsOpen ? "Show less" : "Read more..."}
+            </div>
+          </div>
+        </AccordionTrigger>
+
+        <AccordionContent className="mt-4 border-t border-border pt-4 text-sm text-muted-foreground space-y-4 max-h-[52vh] overflow-y-auto pr-2">
+                    <div>
+                      <p className="font-semibold text-foreground mb-3">BOOKING STEPS:</p>
+                      <div className="ml-4 space-y-3">
+                        <p>
+                          <span className="font-semibold text-foreground">
+                            A. Four ways to book at DigiParc (Digital Events Place @ The PARC)
+                          </span>
+                        </p>
+                        <ul className="list-decimal list-inside space-y-2 ml-2">
+                          <li>
+                            Fill out our online reservation form. <a href="http://DigiPARC.globaltronics.net" className="text-blue-400 hover:underline">http://DigiPARC.globaltronics.net</a>
+                          </li>
+                          <li>
+                            Contact our operations team through the DigiPARC phones:
+                            <ul className="list-disc list-inside ml-4 mt-1">
+                              <li>
+                                Mobile number - <span className="text-blue-400">0998 - 5405370</span> Attention: Sean
+                              </li>
+                              <li>
+                                Landline - <span className="text-blue-400">(02) 8350 - 6356</span> Attention: Bayani or Joey
+                              </li>
+                            </ul>
+                          </li>
+                          <li>
+                            Call for an appointment to see and inspect the DigiPARC facilities.
+                          </li>
+                        </ul>
+                        <p>
+                          <span className="font-semibold text-foreground">B.</span> We will acknowledge and confirm your booking through SMS or email.
+                        </p>
+                        <p className="ml-4 text-sm">
+                          Our DigiPARC team shall inform you of any concern regarding your booking.
+                        </p>
+                        <p>
+                          <span className="font-semibold text-foreground">C.</span> For booking worth P5,000.00 and up, your group can proceed with the 50% down payment once reservation is confirmed.
+                        </p>
+                        <p>
+                          <span className="font-semibold text-foreground">D.</span> The full balance should be paid before the use of the DigiPARC studio.
+                        </p>
+                        <p>
+                          <span className="font-semibold text-foreground">E.</span> A full-day rental is 8 hours half-day is 4 hours. Overtime rates shall apply for all hours outside of 9:00AM to 6:00PM. For overtime, a thirty (30%) percent surcharge shall be applied.
+                        </p>
+                      </div>
+                    </div>
+
+                    <div>
+                      <p className="font-semibold text-foreground mb-3">I. INCLUSIONS</p>
+                      <ul className="list-disc list-inside space-y-2 ml-2">
+                        <li>Unit setup and basic orientation</li>
+                        <li>Technical support (optional for events)</li>
+                      </ul>
+                    </div>
+
+                    <div>
+                      <p className="font-semibold text-foreground mb-3">II. BOOKING POLICIES</p>
+                      <ul className="list-disc list-inside space-y-2 ml-2">
+                        <li>First-come, first-served basis</li>
+                        <li>Reservations must be confirmed with 50% downpayment</li>
+                        <li>Bookings will be accepted only during office hours, Monday to Saturday, 9:00am to 6pm. Rental shall be for a minimum of two hours. We are close during holidays.</li>
+                        <li>Ocular inspections may be done only during office hours with prior notice and scheduled appointment.</li>
+                        <li>A renter should be of legal age, 18 years old and above. A renter with age below 18 years old must be accompanied by an adult. For a corporation. only the authorized person/s should enter into a rental agreement.</li>
+                        <li>We need a 30-minute clean-up time between usage.</li>
+                        <li>Fully payment required prior to deployment</li>
+                        <li>Studio rental is inclusive of DigiPARC venue, LED/commercial display, WIFi, airconditioning, and basic sound system.</li>
+                      </ul>
+                    </div>
+
+                    <div>
+                      <p className="font-semibold text-foreground mb-3">III. PAYMENT</p>
+                      <ul className="list-disc list-inside space-y-2 ml-2">
+                        <li>For holiday bookings, a thirty (30%) percent surcharge shall be applied.</li>
+                        <li>A 50% down payment (DP) is required for any reservation worth P5,000.00 and above payable, upon booking confirmation. Based on our first-to-pay, first-to-be-served policy, a DP confirms your booking and the studio will not be awarded to another client.</li>
+                        <li>Bank transfer / online payment / direct payment accepted</li>
+                        <li>Down payments can be done through:
+                          <ul className="list-decimal list-inside ml-4 mt-1">
+                            <li>Bank deposit or money transfer:
+                              <div className="ml-4 mt-1 text-sm space-y-1">
+                                <p>Account name: Globaltronics, Inc.</p>
+                                <p>Metrobank Account#: 361-402-1897</p>
+                                <p>BDO Account#: 261-0008-941</p>
+                                <p>GCash: <span className="text-blue-400">0917 5262762</span> Macy Guido</p>
+                                <p>Please send a copy of the deposit slip/money transfer to <a href="mailto:mroxas@globaltronics.net" className="text-blue-400 hover:underline">mroxas@globaltronics.net</a>.</p>
+                                <p>We will send a confirmation email to you once we receive your DP.</p>
+                              </div>
+                            </li>
+                            <li>Direct payment at DigiPARC (494 Lt. Artiaga Street, Barangay Corazon De Jesus, San Juan City) or at Globaltronics (349 Ortigas Avenue, Wack-Wack, Mandaluyong City).</li>
+                          </ul>
+                        </li>
+                      </ul>
+                    </div>
+                  </AccordionContent>
+              </AccordionItem>
+            </Accordion>
+          </div>
         </div>
       </div>
     </StarfieldSection>

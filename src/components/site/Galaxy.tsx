@@ -96,16 +96,16 @@ vec3 StarLayer(vec2 uv) {
       float glossLocal = tri(uStarSpeed / (PERIOD * seed + 1.0));
       float flareSize = smoothstep(0.9, 1.0, size) * glossLocal;
 
-      float red = smoothstep(STAR_COLOR_CUTOFF, 1.0, Hash21(si + 1.0)) + STAR_COLOR_CUTOFF;
-      float blu = smoothstep(STAR_COLOR_CUTOFF, 1.0, Hash21(si + 3.0)) + STAR_COLOR_CUTOFF;
-      float grn = min(red, blu) * seed;
-      vec3 base = vec3(red, grn, blu);
-      
-      float hue = atan(base.g - base.r, base.b - base.r) / (2.0 * 3.14159) + 0.5;
-      hue = fract(hue + uHueShift / 360.0);
-      float sat = length(base - vec3(dot(base, vec3(0.299, 0.587, 0.114)))) * uSaturation;
-      float val = max(max(base.r, base.g), base.b);
-      base = hsv2rgb(vec3(hue, sat, val));
+       // Define custom color palette
+      vec3 color1 = vec3(1.0, 0.0, 0.8314);      // #ff00d4
+      vec3 color2 = vec3(0.4706, 0.4510, 0.9569); // #7873f4
+      vec3 color3 = vec3(0.0039, 0.8667, 1.0);   // #01ddff
+
+      float paletteIndex = floor(seed * 3.0);
+      vec3 base = color1;
+      base = mix(base, color2, step(1.0, paletteIndex));
+      base = mix(base, color3, step(2.0, paletteIndex));
+      base *= mix(0.85, 1.0, fract(seed * 45.0));
 
       vec2 pad = vec2(tris(seed * 34.0 + uTime * uSpeed / 10.0), tris(seed * 38.0 + uTime * uSpeed / 30.0)) - 0.5;
 
@@ -144,7 +144,8 @@ void main() {
     uv += mouseOffset;
   }
 
-  float autoRotAngle = uTime * uRotationSpeed;
+  float
+autoRotAngle = uTime * uRotationSpeed;
   mat2 autoRot = mat2(cos(autoRotAngle), -sin(autoRotAngle), sin(autoRotAngle), cos(autoRotAngle));
   uv = autoRot * uv;
 
@@ -283,7 +284,7 @@ export default function Galaxy({
     function update(t: number) {
       animateId = requestAnimationFrame(update);
       if (!disableAnimation) {
-        program.uniforms.uTime.value = t * 0.001;
+program.uniforms.uTime.value = t * 0.001;
         program.uniforms.uStarSpeed.value = (t * 0.001 * starSpeed) / 10.0;
       }
 
