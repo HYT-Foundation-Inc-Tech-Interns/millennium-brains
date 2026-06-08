@@ -8,6 +8,7 @@ import {
   ArrowLeft,
   ArrowRight,
   Calendar,
+  Clock,
   MapPin,
   Users,
   ExternalLink,
@@ -1573,6 +1574,8 @@ function ExperienceInnovation({
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [date, setDate] = useState("");
+  const [ingress, setIngress] = useState("");
+  const [egress, setEgress] = useState("");
   const [address, setAddress] = useState("");
   const [leaseType, setLeaseType] = useState<"short" | "monthly" | "">("");
   const [boardSize, setBoardSize] = useState<"65" | "86" | "">("");
@@ -1679,20 +1682,26 @@ function ExperienceInnovation({
     return "—";
   }
 
-  function isFormValid() {
-    return (
-      fullName.trim().length > 0 &&
-      /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email) &&
-      phone.trim().length > 0 &&
-      date.trim().length > 0 &&
-      address.trim().length > 0 &&
-      leaseType.length > 0 &&
-      boardSize.length > 0 &&
-      packageOption.length > 0 &&
-      termsChecked
-    );
+  function formatTime12(t: string) {
+    if (!t) return "—";
+    const parts = t.split(":");
+    if (parts.length === 0) return t;
+    const hh = parseInt(parts[0], 10) || 0;
+    const mm = parts[1] || "00";
+    const suffix = hh >= 12 ? "PM" : "AM";
+    const hour12 = ((hh + 11) % 12) + 1;
+    return `${hour12}:${mm} ${suffix}`;
   }
 
+  function isFormValid() {
+    if (!fullName.trim() || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email) || !phone.trim() || !date.trim() || !address.trim() || !leaseType || !boardSize || !packageOption || !termsChecked) return false;
+    if (!ingress.trim() || !egress.trim()) return false;
+    const [ih, im] = ingress.split(":").map((v) => parseInt(v, 10) || 0);
+    const [eh, em] = egress.split(":").map((v) => parseInt(v, 10) || 0);
+    const iMinutes = ih * 60 + im;
+    const eMinutes = eh * 60 + em;
+    return eMinutes > iMinutes;
+  }
   const shortTermSizes = [
     {
       id: "65" as const,
@@ -1960,11 +1969,24 @@ function ExperienceInnovation({
                       if (!email.trim() || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) nextErrors.email = "Valid email is required.";
                       if (!phone.trim()) nextErrors.phone = "Phone number is required.";
                       if (!date.trim()) nextErrors.date = "Date is required.";
+                      if (!ingress.trim()) nextErrors.ingress = "Ingress time is required.";
+                      if (!egress.trim()) nextErrors.egress = "Egress time is required.";
                       if (!address.trim()) nextErrors.address = "Full address is required.";
                       if (!leaseType) nextErrors.leaseType = "Lease type is required.";
                       if (!boardSize) nextErrors.boardSize = "Smart board size is required.";
                       if (!packageOption) nextErrors.packageOption = "Please select a package.";
                       if (!termsChecked) nextErrors.terms = "You must agree to the terms.";
+
+                      // validate ingress < egress
+                      if (ingress.trim() && egress.trim()) {
+                        const [ih, im] = ingress.split(":").map((v) => parseInt(v, 10) || 0);
+                        const [eh, em] = egress.split(":").map((v) => parseInt(v, 10) || 0);
+                        const iMinutes = ih * 60 + im;
+                        const eMinutes = eh * 60 + em;
+                        if (eMinutes <= iMinutes) {
+                          nextErrors.egress = "Egress time must be later than Ingress time.";
+                        }
+                      }
 
                       setErrors(nextErrors);
 
@@ -2013,14 +2035,32 @@ function ExperienceInnovation({
 
                     <div>
                       <label className="text-sm font-medium">Full Address</label>
-                      <textarea rows={3} value={address} onChange={(e) => setAddress(e.target.value)} className="mt-2 w-full bg-input border border-border rounded-lg px-4 py-3 text-sm resize-none" />
+                      <input value={address} onChange={(e) => setAddress(e.target.value)} className="mt-2 w-full bg-input border border-border rounded-lg px-4 py-3 text-sm" />
                       {errors.address ? <div className="text-xs text-red-400 mt-1">{errors.address}</div> : null}
                     </div>
+
+                     <div className="grid md:grid-cols-2 gap-4">
+                        <div>
+                          <label className="text-sm font-medium flex items-center gap-2">
+                            <Clock className="w-4 h-4 text-primary" /> Ingress <span className="text-xs text-muted-foreground ml-2">e.g. 1:00 PM</span>
+                          </label>
+                          <input type="time" value={ingress} onChange={(e) => setIngress(e.target.value)} className="mt-2 w-full bg-input border border-border rounded-lg px-4 py-3 text-sm" />
+                          {errors.ingress ? <div className="text-xs text-red-400 mt-1">{errors.ingress}</div> : null}
+                        </div>
+
+                        <div>
+                          <label className="text-sm font-medium flex items-center gap-2">
+                            <Clock className="w-4 h-4 text-primary" /> Egress <span className="text-xs text-muted-foreground ml-2">e.g. 6:00 PM</span>
+                          </label>
+                          <input type="time" value={egress} onChange={(e) => setEgress(e.target.value)} className="mt-2 w-full bg-input border border-border rounded-lg px-4 py-3 text-sm" />
+                          {errors.egress ? <div className="text-xs text-red-400 mt-1">{errors.egress}</div> : null}
+                        </div>
+                      </div>
 
                     <div className="grid md:grid-cols-2 gap-4">
                       <div>
                         <label className="text-sm font-medium">Lease Type</label>
-                        <select value={leaseType} onChange={(e) => { const v = e.target.value as "short" | "monthly" | ""; setLeaseType(v); setPackageOption(""); }} className="mt-2 w-full bg-input border border-border rounded-lg px-4 py-3 text-sm">
+                        <select value={leaseType} onChange={(e) => { const v = e.target.value as "short" | "monthly" | ""; setLeaseType(v); setPackageOption(""); }} className="mt-2 w-full bg-input border border-border rounded-lg px-4 py-3 text-sm focus:bg-black focus:outline-none">
                           <option value="">Select lease type</option>
                           <option value="short">Short-Term Lease (Events / Conferences)</option>
                           <option value="monthly">Monthly Lease (Organizations / Offices)</option>
@@ -2030,7 +2070,7 @@ function ExperienceInnovation({
 
                       <div>
                         <label className="text-sm font-medium">Smart Board Size</label>
-                        <select value={boardSize} onChange={(e) => setBoardSize(e.target.value as "65" | "86" | "")} className="mt-2 w-full bg-input border border-border rounded-lg px-4 py-3 text-sm">
+                        <select value={boardSize} onChange={(e) => setBoardSize(e.target.value as "65" | "86" | "")} className="mt-2 w-full bg-input border border-border rounded-lg px-4 py-3 text-sm focus:bg-black focus:outline-none">
                           <option value="">Select size</option>
                           <option value="65">65 Inches</option>
                           <option value="86">86 Inches</option>
@@ -2074,6 +2114,8 @@ function ExperienceInnovation({
                         <div>Display Size: <span className="text-foreground font-medium">{boardSize ? `${boardSize} Inches` : "—"}</span></div>
                         <div>Selected Package: <span className="text-foreground font-medium">{packageOption || "—"}</span></div>
                         <div>Estimated Price: <span className="text-foreground font-medium">{getEstimatedPrice()}</span></div>
+                        <div>Ingress: <span className="text-foreground font-medium">{ingress ? formatTime12(ingress) : "—"}</span></div>
+                        <div>Egress: <span className="text-foreground font-medium">{egress ? formatTime12(egress) : "—"}</span></div>
                       </div>
                     </div>
 
@@ -2102,25 +2144,25 @@ function ExperienceInnovation({
                               <p className="font-semibold text-foreground mb-3">BOOKING STEPS:</p>
                               <div className="ml-4 space-y-3">
                                 <p>
-                                  <span className="font-semibold text-foreground">A. Four ways to book at DigiPARC (Digital Events Place @ The PARC)</span>
+                                  <span className="font-semibold text-foreground">A. Four ways to book at Brains Infinite Innovation (Digital Events Place @ Brains Infinite Innovation)</span>
                                 </p>
                                 <ul className="list-decimal list-inside space-y-2 ml-2">
                                   <li>
-                                    Fill out our online reservation form. <a href="http://DigiPARC.globaltronics.net" className="text-blue-400 hover:underline">http://DigiPARC.globaltronics.net</a>
+                                    Fill out our online reservation form. <a href=" " className="text-blue-400 hover:underline"> </a>
                                   </li>
                                   <li>
-                                    Contact our operations team through the DigiPARC phones:
+                                    Contact our operations team through the Brains Infinite Innovation phones:
                                     <ul className="list-disc list-inside ml-4 mt-1">
                                       <li>Mobile number - <span className="text-blue-400">0998 - 5405370</span> Attention: Sean</li>
                                       <li>Landline - <span className="text-blue-400">(02) 8350 - 6356</span> Attention: Bayani or Joey</li>
                                     </ul>
                                   </li>
-                                  <li>Call for an appointment to see and inspect the DigiPARC facilities.</li>
+                                  <li>Call for an appointment to see and inspect the Brains Infinite Innovation facilities.</li>
                                 </ul>
                                 <p className="mt-2"><span className="font-semibold text-foreground">B.</span> We will acknowledge and confirm your booking through SMS or email.</p>
-                                <p className="ml-4 text-sm">Our DigiPARC team shall inform you of any concern regarding your booking.</p>
+                                <p className="ml-4 text-sm">Our Brains Infinite Innovation team shall inform you of any concern regarding your booking.</p>
                                 <p className="mt-2"><span className="font-semibold text-foreground">C.</span> For booking worth P5,000.00 and up, your group can proceed with the 50% down payment once reservation is confirmed.</p>
-                                <p className="mt-2"><span className="font-semibold text-foreground">D.</span> The full balance should be paid before the use of the DigiPARC studio.</p>
+                                <p className="mt-2"><span className="font-semibold text-foreground">D.</span> The full balance should be paid before the use of the Brains Infinite Innovation studio.</p>
                                 <p className="mt-2"><span className="font-semibold text-foreground">E.</span> A full-day rental is 8 hours half-day is 4 hours. Overtime rates shall apply for all hours outside of 9:00AM to 6:00PM. For overtime, a thirty (30%) percent surcharge shall be applied.</p>
                               </div>
                             </div>
@@ -2143,7 +2185,7 @@ function ExperienceInnovation({
                                 <li>A renter should be of legal age, 18 years old and above. A renter with age below 18 years old must be accompanied by an adult. For a corporation. only the authorized person/s should enter into a rental agreement.</li>
                                 <li>We need a 30-minute clean-up time between usage.</li>
                                 <li>Fully payment required prior to deployment</li>
-                                <li>Studio rental is inclusive of DigiPARC venue, LED/commercial display, WIFi, airconditioning, and basic sound system.</li>
+                                <li>Studio rental is inclusive of Brains Infinite Innovation venue, LED/commercial display, WIFi, airconditioning, and basic sound system.</li>
                               </ul>
                             </div>
 
@@ -2165,7 +2207,7 @@ function ExperienceInnovation({
                                         <p>We will send a confirmation email to you once we receive your DP.</p>
                                       </div>
                                     </li>
-                                    <li>Direct payment at DigiPARC (494 Lt. Artiaga Street, Barangay Corazon De Jesus, San Juan City) or at Globaltronics (349 Ortigas Avenue, Wack-Wack, Mandaluyong City).</li>
+                                    <li>Direct payment at Brains Infinite Innovation (494 Lt. Artiaga Street, Barangay Corazon De Jesus, San Juan City) or at Globaltronics (349 Ortigas Avenue, Wack-Wack, Mandaluyong City).</li>
                                   </ul>
                                 </li>
                               </ul>
