@@ -1566,9 +1566,7 @@ function ExperienceInnovation({
   shortTermSelectorRef: React.RefObject<HTMLDivElement | null>;
   monthlySelectorRef: React.RefObject<HTMLDivElement | null>;
 }) {
-  const [termsOpen, setTermsOpen] = useState(false);
   const leaseSectionRef = useRef<HTMLDivElement | null>(null);
-  const termsSectionRef = useRef<HTMLDivElement | null>(null);
   // Leasing form state
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
@@ -1580,7 +1578,6 @@ function ExperienceInnovation({
   const [leaseType, setLeaseType] = useState<"short" | "monthly" | "">("");
   const [boardSize, setBoardSize] = useState<"65" | "86" | "">("");
   const [packageOption, setPackageOption] = useState("");
-  const [termsChecked, setTermsChecked] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
@@ -1594,6 +1591,7 @@ function ExperienceInnovation({
   const [demoErrors, setDemoErrors] = useState<Record<string, string>>({});
   const [demoSubmitting, setDemoSubmitting] = useState(false);
   const [demoSubmitted, setDemoSubmitted] = useState(false);
+  const [demoTermsChecked, setDemoTermsChecked] = useState(false);
 
   const closeAllDropdowns = () => {
     setShowShortTermSelector(false);
@@ -1611,9 +1609,7 @@ function ExperienceInnovation({
         closeAllDropdowns();
       }
 
-      if (termsOpen && termsSectionRef.current && !termsSectionRef.current.contains(target)) {
-        setTermsOpen(false);
-      }
+      // no-op for terms section here (moved to Book Demo)
     };
 
     document.addEventListener("mousedown", handlePointerDown);
@@ -1623,7 +1619,7 @@ function ExperienceInnovation({
       document.removeEventListener("mousedown", handlePointerDown);
       document.removeEventListener("touchstart", handlePointerDown);
     };
-  }, [showShortTermSelector, showMonthlySelector, termsOpen]);
+  }, [showShortTermSelector, showMonthlySelector]);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -1636,17 +1632,12 @@ function ExperienceInnovation({
         }
       }
 
-      if (termsOpen && termsSectionRef.current) {
-        const rect = termsSectionRef.current.getBoundingClientRect();
-        if (rect.bottom < 96 || rect.top > window.innerHeight - 96) {
-          setTermsOpen(false);
-        }
-      }
+      // terms section handling removed (terms moved to Book Demo)
     };
 
     window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
-  }, [termsOpen]);
+  }, []);
 
   // Sync pricing selectors into the inquiry form
   useEffect(() => {
@@ -1694,7 +1685,7 @@ function ExperienceInnovation({
   }
 
   function isFormValid() {
-    if (!fullName.trim() || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email) || !phone.trim() || !date.trim() || !address.trim() || !leaseType || !boardSize || !packageOption || !termsChecked) return false;
+    if (!fullName.trim() || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email) || !phone.trim() || !date.trim() || !address.trim() || !leaseType || !boardSize || !packageOption) return false;
     if (!ingress.trim() || !egress.trim()) return false;
     const [ih, im] = ingress.split(":").map((v) => parseInt(v, 10) || 0);
     const [eh, em] = egress.split(":").map((v) => parseInt(v, 10) || 0);
@@ -1975,7 +1966,7 @@ function ExperienceInnovation({
                       if (!leaseType) nextErrors.leaseType = "Lease type is required.";
                       if (!boardSize) nextErrors.boardSize = "Smart board size is required.";
                       if (!packageOption) nextErrors.packageOption = "Please select a package.";
-                      if (!termsChecked) nextErrors.terms = "You must agree to the terms.";
+                      // Terms agreement removed from Lease Now
 
                       // validate ingress < egress
                       if (ingress.trim() && egress.trim()) {
@@ -2119,109 +2110,7 @@ function ExperienceInnovation({
                       </div>
                     </div>
 
-                    <div className="card-surface p-6 mt-6 mb-6 rounded-3xl border border-border">
-                      <Accordion
-                        type="single"
-                        collapsible
-                        value={termsOpen ? "terms" : ""}
-                        onValueChange={(value) => setTermsOpen(value === "terms")}
-                      >
-                        <AccordionItem value="terms" className="border-0">
-                          <AccordionTrigger className="w-full rounded-3xl p-6 text-left hover:no-underline [&>svg]:hidden">
-                            <div className="flex w-full flex-col gap-4">
-                              <div className="space-y-2">
-                                <div className="text-sm font-semibold text-foreground">TERMS AND CONDITIONS</div>
-                                <p className="text-sm text-muted-foreground max-w-3xl">Review the booking and payment policies before submitting your inquiry.</p>
-                              </div>
-
-                              <div className="text-right text-sm font-semibold text-primary">{termsOpen ? "Show less" : "Read more..."}</div>
-                            </div>
-                          </AccordionTrigger>
-
-                          <AccordionContent className="mt-4 border-t border-border pt-4 text-sm text-muted-foreground space-y-4 max-h-[52vh] overflow-y-auto pr-2">
-                            {/* Terms content preserved unchanged */}
-                            <div>
-                              <p className="font-semibold text-foreground mb-3">BOOKING STEPS:</p>
-                              <div className="ml-4 space-y-3">
-                                <p>
-                                  <span className="font-semibold text-foreground">A. Four ways to book at Brains Infinite Innovation (Digital Events Place @ Brains Infinite Innovation)</span>
-                                </p>
-                                <ul className="list-decimal list-inside space-y-2 ml-2">
-                                  <li>
-                                    Fill out our online reservation form. <a href=" " className="text-blue-400 hover:underline"> </a>
-                                  </li>
-                                  <li>
-                                    Contact our operations team through the Brains Infinite Innovation phones:
-                                    <ul className="list-disc list-inside ml-4 mt-1">
-                                      <li>Mobile number - <span className="text-blue-400">0998 - 5405370</span> Attention: Sean</li>
-                                      <li>Landline - <span className="text-blue-400">(02) 8350 - 6356</span> Attention: Bayani or Joey</li>
-                                    </ul>
-                                  </li>
-                                  <li>Call for an appointment to see and inspect the Brains Infinite Innovation facilities.</li>
-                                </ul>
-                                <p className="mt-2"><span className="font-semibold text-foreground">B.</span> We will acknowledge and confirm your booking through SMS or email.</p>
-                                <p className="ml-4 text-sm">Our Brains Infinite Innovation team shall inform you of any concern regarding your booking.</p>
-                                <p className="mt-2"><span className="font-semibold text-foreground">C.</span> For booking worth P5,000.00 and up, your group can proceed with the 50% down payment once reservation is confirmed.</p>
-                                <p className="mt-2"><span className="font-semibold text-foreground">D.</span> The full balance should be paid before the use of the Brains Infinite Innovation studio.</p>
-                                <p className="mt-2"><span className="font-semibold text-foreground">E.</span> A full-day rental is 8 hours half-day is 4 hours. Overtime rates shall apply for all hours outside of 9:00AM to 6:00PM. For overtime, a thirty (30%) percent surcharge shall be applied.</p>
-                              </div>
-                            </div>
-
-                            <div>
-                              <p className="font-semibold text-foreground mb-3">I. INCLUSIONS</p>
-                              <ul className="list-disc list-inside space-y-2 ml-2">
-                                <li>Unit setup and basic orientation</li>
-                                <li>Technical support (optional for events)</li>
-                              </ul>
-                            </div>
-
-                            <div>
-                              <p className="font-semibold text-foreground mb-3">II. BOOKING POLICIES</p>
-                              <ul className="list-disc list-inside space-y-2 ml-2">
-                                <li>First-come, first-served basis</li>
-                                <li>Reservations must be confirmed with 50% downpayment</li>
-                                <li>Bookings will be accepted only during office hours, Monday to Saturday, 9:00am to 6pm. Rental shall be for a minimum of two hours. We are close during holidays.</li>
-                                <li>Ocular inspections may be done only during office hours with prior notice and scheduled appointment.</li>
-                                <li>A renter should be of legal age, 18 years old and above. A renter with age below 18 years old must be accompanied by an adult. For a corporation. only the authorized person/s should enter into a rental agreement.</li>
-                                <li>We need a 30-minute clean-up time between usage.</li>
-                                <li>Fully payment required prior to deployment</li>
-                                <li>Studio rental is inclusive of Brains Infinite Innovation venue, LED/commercial display, WIFi, airconditioning, and basic sound system.</li>
-                              </ul>
-                            </div>
-
-                            <div>
-                              <p className="font-semibold text-foreground mb-3">III. PAYMENT</p>
-                              <ul className="list-disc list-inside space-y-2 ml-2">
-                                <li>For holiday bookings, a thirty (30%) percent surcharge shall be applied.</li>
-                                <li>A 50% down payment (DP) is required for any reservation worth P5,000.00 and above payable, upon booking confirmation. Based on our first-to-pay, first-to-be-served policy, a DP confirms your booking and the studio will not be awarded to another client.</li>
-                                <li>Bank transfer / online payment / direct payment accepted</li>
-                                <li>Down payments can be done through:
-                                  <ul className="list-decimal list-inside ml-4 mt-1">
-                                    <li>Bank deposit or money transfer:
-                                      <div className="ml-4 mt-1 text-sm space-y-1">
-                                        <p>Account name: Globaltronics, Inc.</p>
-                                        <p>Metrobank Account#: 361-402-1897</p>
-                                        <p>BDO Account#: 261-0008-941</p>
-                                        <p>GCash: <span className="text-blue-400">0917 5262762</span> Macy Guido</p>
-                                        <p>Please send a copy of the deposit slip/money transfer to <a href="mailto:mroxas@globaltronics.net" className="text-blue-400 hover:underline">mroxas@globaltronics.net</a>.</p>
-                                        <p>We will send a confirmation email to you once we receive your DP.</p>
-                                      </div>
-                                    </li>
-                                    <li>Direct payment at Brains Infinite Innovation (494 Lt. Artiaga Street, Barangay Corazon De Jesus, San Juan City) or at Globaltronics (349 Ortigas Avenue, Wack-Wack, Mandaluyong City).</li>
-                                  </ul>
-                                </li>
-                              </ul>
-                            </div>
-                          </AccordionContent>
-                        </AccordionItem>
-                      </Accordion>
-                    </div>
-
-                    <div className="flex items-center gap-3 mt-4 mb-5">
-                      <input id="terms_agree" type="checkbox" checked={termsChecked} onChange={(e) => setTermsChecked(e.target.checked)} />
-                      <label htmlFor="terms_agree" className="text-sm">I have read and agree to the Terms and Conditions.</label>
-                    </div>
-                    {errors.terms ? <div className="text-xs text-red-400 mt-1">{errors.terms}</div> : null}
+                    
 
                     <button type="submit" disabled={!isFormValid()} className={`btn-primary w-full ${!isFormValid() ? "opacity-60 cursor-not-allowed" : ""}`}>
                       REQUEST LEASE QUOTATION
@@ -2293,6 +2182,9 @@ function ExperienceInnovation({
                   setDemoErrors(newErrors);
                   if (Object.keys(newErrors).length > 0) return;
 
+                  // require terms agreement for demo
+                  if (!demoTermsChecked) return;
+
                   setDemoSubmitting(true);
                   // emulate async submit
                   setTimeout(() => {
@@ -2307,7 +2199,7 @@ function ExperienceInnovation({
                     setDemoMessage("");
                     setDemoErrors({});
                     closeAllDropdowns();
-                    setTermsOpen(false);
+                    setDemoTermsChecked(false);
                   }, 900);
                 }}
               >
@@ -2403,9 +2295,63 @@ function ExperienceInnovation({
                   {demoErrors.message ? <div className="text-xs text-red-400 mt-1">This field is required.</div> : null}
                 </div>
 
+                <div className="card-surface p-4 rounded-lg border border-border">
+                  <div className="text-sm font-semibold text-foreground text-center">TERMS AND CONDITIONS</div>
+                  <div className="text-sm text-muted-foreground text-center mt-1">Review the booking and payment policies before submitting your inquiry.</div>
+                  <div className="mt-4 text-sm text-muted-foreground max-h-[36vh] overflow-y-auto pr-2">
+                    {/* Terms content (visible, scrollable) */}
+                    <div>
+                     
+                    </div>
+                    <div className="mt-4">
+                      <p className="font-semibold text-foreground mb-2">I. INCLUSIONS</p>
+                      <ul className="list-disc list-inside space-y-2 ml-2">
+                        <li>Unit setup and basic orientation</li>
+                        <li>Technical support (optional for events)</li>
+                      </ul>
+                    </div>
+                    <div className="mt-4">
+                      <p className="font-semibold text-foreground mb-2">II. BOOKING POLICIES</p>
+                      <ul className="list-disc list-inside space-y-2 ml-2">
+                        <li>First-come, first-served basis</li>
+                        <li>Reservations must be confirmed with 50% downpayment</li>
+                        <li>Bookings will be accepted only during office hours, Monday to Saturday, 9:00am to 6pm. Rental shall be for a minimum of two hours. We are close during holidays.</li>
+                        <li>Ocular inspections may be done only during office hours with prior notice and scheduled appointment.</li>
+                        <li>A renter should be of legal age, 18 years old and above. A renter with age below 18 years old must be accompanied by an adult. For a corporation. only the authorized person/s should enter into a rental agreement.</li>
+                        <li>We need a 30-minute clean-up time between usage.</li>
+                        <li>Fully payment required prior to deployment</li>
+                        <li>Studio rental is inclusive of Brains Infinite Innovation venue, LED/commercial display, WIFi, airconditioning, and basic sound system.</li>
+                      </ul>
+                    </div>
+                    <div className="mt-4">
+                      <p className="font-semibold text-foreground mb-2">III. PAYMENT</p>
+                      <ul className="list-disc list-inside space-y-2 ml-2">
+                        <li>For holiday bookings, a thirty (30%) percent surcharge shall be applied.</li>
+                        <li>A 50% down payment (DP) is required for any reservation worth P5,000.00 and above payable, upon booking confirmation. Based on our first-to-pay, first-to-be-served policy, a DP confirms your booking and the studio will not be awarded to another client.</li>
+                        <li>Bank transfer / online payment / direct payment accepted</li>
+                        <li>Down payments can be done through:
+
+                          <div className="ml-4 mt-1 text-sm space-y-1">
+                            <p>Account name: Globaltronics, Inc.</p>
+                            <p>Metrobank Account#: 361-402-1897</p>
+                            <p>BDO Account#: 261-0008-941</p>
+                            <p>GCash: <span className="text-blue-400">0917 5262762</span> Macy Guido</p>
+                            <p>Please send a copy of the deposit slip/money transfer to <a href="mailto:mroxas@globaltronics.net" className="text-blue-400 hover:underline">mroxas@globaltronics.net</a>.</p>
+                          </div>
+                        </li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-3 mt-4 mb-5">
+                  <input id="demo_terms_agree" type="checkbox" checked={demoTermsChecked} onChange={(e) => setDemoTermsChecked(e.target.checked)} />
+                  <label htmlFor="demo_terms_agree" className="text-sm">I have read and agree to the Terms and Conditions.</label>
+                </div>
+
                 <button
                   type="submit"
-                  className={`btn-primary w-full ${(!demoFullName || !demoEmail || !demoPhone || !demoCompany || !demoSolution || !demoMessage || demoSubmitting) ? "opacity-60 cursor-not-allowed" : ""}`}
+                  className={`btn-primary w-full ${(!demoFullName || !demoEmail || !demoPhone || !demoCompany || !demoSolution || !demoMessage || demoSubmitting || !demoTermsChecked) ? "opacity-60 cursor-not-allowed" : ""}`}
                   disabled={
                     demoSubmitting ||
                     !(
@@ -2416,7 +2362,8 @@ function ExperienceInnovation({
                       demoSolution.trim() &&
                       demoMessage.trim() &&
                       /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(demoEmail) &&
-                      demoPhone.replace(/\D/g, "").length >= 7
+                      demoPhone.replace(/\D/g, "").length >= 7 &&
+                      demoTermsChecked
                     )
                   }
                 >
