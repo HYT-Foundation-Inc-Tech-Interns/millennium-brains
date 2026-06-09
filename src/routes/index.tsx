@@ -42,6 +42,7 @@ import {
   ChevronDown,
 } from "lucide-react";
 import heroImg from "@/assets/millennium tv.png";
+import footerLogo from "@/assets/Logo Millennium Paltinum PNG.png";
 import { Header } from "@/components/site/Header";
 import { ProjectCard } from "@/components/site/ProjectCard";
 import { SectionHeading } from "@/components/site/SectionHeading";
@@ -2611,8 +2612,17 @@ function Footer() {
           </div>
         </div>
 
-        <div className="mt-10 pt-8 border-t border-border flex flex-col md:flex-row justify-between gap-4 text-sm text-muted-foreground">
-          <div>© 2026 Millennium Dynamic Touch Panel. All rights reserved.</div>
+        <div className="mt-10 pt-8 border-t border-border flex flex-col md:flex-row md:items-center justify-between gap-4 text-sm text-muted-foreground">
+          <div className="flex items-center gap-3">
+            <div className="h-7 w-36 overflow-hidden">
+              <img
+                src={footerLogo}
+                alt="Millennium logo"
+                className="h-full w-full object-cover object-center"
+              />
+            </div>
+            <span>© 2026 Millennium Dynamic Touch Panel. All rights reserved.</span>
+          </div>
           <div className="flex gap-6">
             <a href="#">Privacy Policy</a>
             <a href="#">Terms of Service</a>
