@@ -1,19 +1,20 @@
 // @lovable.dev/vite-tanstack-config already includes the following — do NOT add them manually
 // or the app will break with duplicate plugins:
-//   - tanstackStart, viteReact, tailwindcss, tsConfigPaths, cloudflare (build-only),
-//     componentTagger (dev-only), VITE_* env injection, @ path alias, React/TanStack dedupe,
-//     error logger plugins, and sandbox detection (port/host/strictPort).
+//   - tanstackStart, viteReact, tailwindcss, tsConfigPaths, componentTagger (dev-only),
+//     VITE_* env injection, @ path alias, React/TanStack dedupe, error logger plugins,
+//     and sandbox detection (port/host/strictPort).
 // You can pass additional config via defineConfig({ vite: { ... } }) if needed.
 import { defineConfig } from "@lovable.dev/vite-tanstack-config/dist/index.js";
-import { nitro } from "nitro/vite";
 
-// Cloudflare builds (default in @lovable.dev/vite-tanstack-config) emit a Workers bundle;
-// Vercel needs Nitro instead — see https://vercel.com/docs/frameworks/full-stack/tanstack-start
+// The deploy bundle is produced by Nitro. It only auto-enables inside Lovable's
+// environment, so for self-deploy (Cloudflare/Vercel) we force it on:
+//   - Cloudflare: `nitro: true` uses the default `cloudflare-module` preset.
+//   - Vercel: override the preset.
 const deployTarget = process.env.VERCEL === "1" ? "vercel" : "cloudflare";
 
-// Redirect TanStack Start's bundled server entry to src/server.ts (SSR error wrapper for CF).
+// Redirect TanStack Start's bundled server entry to src/server.ts (SSR error wrapper).
 export default defineConfig({
-  cloudflare: deployTarget === "vercel" ? false : undefined,
+  nitro: deployTarget === "vercel" ? { preset: "vercel" } : true,
   tanstackStart: {
     server: { entry: "server" },
   },
@@ -21,6 +22,5 @@ export default defineConfig({
     define: {
       __VERCEL__: deployTarget === "vercel",
     },
-    plugins: deployTarget === "vercel" ? [nitro()] : [],
   },
 });
