@@ -24,7 +24,7 @@ export function IntroOverlay({ onComplete }: IntroOverlayProps) {
     // timing consistent regardless of clip length, load errors, or autoplay.
     const timerId = window.setTimeout(() => {
       onComplete();
-    }, 3000);
+    }, 1500);
 
     return () => {
       html.style.overflow = previousHtmlOverflow;
