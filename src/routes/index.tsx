@@ -989,24 +989,40 @@ function VideoShowcase() {
                   Your browser does not support the video tag.
                 </video>
 
-                <div className="pointer-events-none absolute inset-0 opacity-[0.08] mix-blend-soft-light bg-[radial-gradient(circle_at_20%_20%,rgba(255,255,255,0.35)_0_1px,transparent_1px)] bg-[length:4px_4px]" />
-                <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,transparent_70%,rgba(0,0,0,0.35)_100%)]" />
+                      {/* Grain overlay (non-interactive) */}
+                      <div className="pointer-events-none absolute inset-0 opacity-[0.06] mix-blend-overlay bg-[radial-gradient(circle_at_20%_20%,rgba(255,255,255,0.35)_0_1px,transparent_1px)] bg-[length:3px_3px]" />
+                      <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,transparent_75%,rgba(0,0,0,0.45)_100%)]" />
+                    </div>
+                  </div>
+
+                  {/* Bottom device bar - thicker and visible */}
+                  <div className="mt-4 -mx-4 rounded-b-[0.85rem] bg-gradient-to-b from-zinc-900 to-zinc-800 border-t border-black/50 flex items-center justify-between px-6"
+                       style={{ height: '56px' }}>
+                    <div className="flex items-center gap-3 text-xs text-white/40">
+                      <span className="ml-1 tracking-[0.2em]">MILLENNIUM</span>
+                    </div>
+
+                    <div className="flex items-center gap-3">
+                      {/* small control buttons */}
+                      <div className="flex items-center gap-2 pr-2">
+                        <span className="h-3 w-3 rounded-full bg-zinc-700 border border-black/60 shadow-[0_1px_0_rgba(255,255,255,0.02)]" />
+                        <span className="h-3 w-3 rounded-full bg-zinc-700 border border-black/60 shadow-[0_1px_0_rgba(255,255,255,0.02)]" />
+                        <span className="h-3 w-3 rounded-full bg-zinc-700 border border-black/60 shadow-[0_1px_0_rgba(255,255,255,0.02)]" />
+                      </div>
+
+                      {/* indicator lights */}
+                      <div className="flex items-center gap-2">
+                        <span className="h-2 w-2 rounded-full bg-blue-400 shadow-[0_0_8px_rgba(96,165,250,0.9)]" />
+                        <span className="h-2 w-2 rounded-full bg-blue-400 shadow-[0_0_8px_rgba(96,165,250,0.9)]" />
+                        <span className="h-2 w-2 rounded-full bg-blue-400 shadow-[0_0_8px_rgba(96,165,250,0.9)]" />
+                        <span className="h-2 w-2 rounded-full bg-blue-400 shadow-[0_0_8px_rgba(96,165,250,0.9)]" />
+                        <span className="ml-3 h-2 w-5 rounded-full bg-red-500 shadow-[0_0_12px_rgba(239,68,68,0.9)]" />
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
-
-            <div className="relative flex items-center justify-end gap-2 px-6 pt-3 pb-1">
-              <span className="mr-auto text-[10px] tracking-[0.25em] text-white/30">MILLENNIUM</span>
-              <span className="h-2 w-2 rounded-full bg-zinc-600" />
-              <span className="h-2 w-2 rounded-full bg-zinc-600" />
-              <span className="h-2 w-2 rounded-full bg-zinc-600" />
-              <span className="ml-3 h-2 w-2 rounded-full bg-blue-400 shadow-[0_0_10px_rgba(96,165,250,0.9)]" />
-              <span className="h-2 w-2 rounded-full bg-blue-400 shadow-[0_0_10px_rgba(96,165,250,0.9)]" />
-              <span className="h-2 w-2 rounded-full bg-blue-400 shadow-[0_0_10px_rgba(96,165,250,0.9)]" />
-              <span className="ml-3 h-2 w-5 rounded-full bg-red-500 shadow-[0_0_12px_rgba(239,68,68,0.9)]" />
-            </div>
-          </div>
-        </div>
-      </div>
     </StarfieldSection>
   );
 }
