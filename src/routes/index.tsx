@@ -969,40 +969,72 @@ function VideoShowcase() {
           subtitle="Discover how Millennium transforms presentations, collaboration, and smart environments."
         />
 
-        <div className="mx-auto mt-12 w-full max-w-[1280px] px-4">
-          <div className="relative rounded-[1.4rem] border border-white/15 bg-gradient-to-b from-zinc-700/40 via-zinc-950 to-black p-4 shadow-[0_40px_120px_rgba(0,0,0,0.65)]">
-            <div className="absolute inset-0 rounded-[1.4rem] pointer-events-none bg-[linear-gradient(135deg,rgba(255,255,255,0.06),transparent_20%,rgba(255,255,255,0.02)_45%,transparent_70%)] opacity-30" />
+        <div className="mx-auto mt-12 w-full max-w-[1400px] px-4">
+          <div className="relative rounded-[1.6rem] p-6 bg-transparent" style={{ maxWidth: '100%' }}>
+            {/* Outer device frame */}
+            <div className="relative rounded-[1.6rem] overflow-visible">
+              <div className="absolute inset-0 rounded-[1.6rem] bg-gradient-to-b from-zinc-900 via-zinc-800 to-black border-[10px] border-zinc-900 shadow-[0_30px_80px_rgba(2,6,23,0.75)]" />
 
-            <div className="relative rounded-xl border border-black bg-black p-2 shadow-inner">
-              <div className="relative aspect-[1953.6/1152.7] w-full overflow-hidden rounded-lg bg-black">
-                <video
-                  ref={videoRef}
-                  className="h-full w-full object-cover"
-                  muted
-                  autoPlay
-                  loop
-                  playsInline
-                  controls
-                  preload="metadata"
-                >
-                  <source src="/videos/millennium-showcase.mp4" type="video/mp4" />
-                  Your browser does not support the video tag.
-                </video>
+              {/* Brushed metal highlight + subtle top-left sheen */}
+              <div className="absolute inset-0 rounded-[1.6rem] pointer-events-none" style={{
+                background: 'linear-gradient(180deg, rgba(255,255,255,0.02), transparent 12%), linear-gradient(135deg, rgba(255,255,255,0.035) 0%, rgba(255,255,255,0) 18%)',
+                mixBlendMode: 'overlay',
+                opacity: 0.14,
+              }} />
 
-                <div className="pointer-events-none absolute inset-0 opacity-[0.08] mix-blend-soft-light bg-[radial-gradient(circle_at_20%_20%,rgba(255,255,255,0.35)_0_1px,transparent_1px)] bg-[length:4px_4px]" />
-                <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,transparent_70%,rgba(0,0,0,0.35)_100%)]" />
+              {/* Inner bezel container (device body) */}
+              <div className="relative rounded-[1.05rem] mx-auto overflow-hidden" >
+                <div className="relative rounded-[0.9rem] bg-zinc-950 p-4 shadow-inner" style={{ boxShadow: 'inset 0 6px 18px rgba(0,0,0,0.8)' }}>
+                  {/* Screen area with black inner bezel */}
+                  <div className="relative rounded-[0.6rem] bg-black overflow-hidden" style={{ padding: '6px' }}>
+                    <div className="relative aspect-[1953.6/1152.7] w-full overflow-hidden rounded-sm bg-black shadow-[0_12px_40px_rgba(0,0,0,0.6)]">
+                      <video
+                        ref={videoRef}
+                        className="h-full w-full object-cover"
+                        muted
+                        autoPlay
+                        loop
+                        playsInline
+                        controls
+                        preload="metadata"
+                      >
+                        <source src="/videos/Millenvid.mp4" type="video/mp4" />
+                        Your browser does not support the video tag.
+                      </video>
+
+                      {/* Grain overlay (non-interactive) */}
+                      <div className="pointer-events-none absolute inset-0 opacity-[0.06] mix-blend-overlay bg-[radial-gradient(circle_at_20%_20%,rgba(255,255,255,0.35)_0_1px,transparent_1px)] bg-[length:3px_3px]" />
+                      <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,transparent_75%,rgba(0,0,0,0.45)_100%)]" />
+                    </div>
+                  </div>
+
+                  {/* Bottom device bar - thicker and visible */}
+                  <div className="mt-4 -mx-4 rounded-b-[0.85rem] bg-gradient-to-b from-zinc-900 to-zinc-800 border-t border-black/50 flex items-center justify-between px-6"
+                       style={{ height: '56px' }}>
+                    <div className="flex items-center gap-3 text-xs text-white/40">
+                      <span className="ml-1 tracking-[0.2em]">MILLENNIUM</span>
+                    </div>
+
+                    <div className="flex items-center gap-3">
+                      {/* small control buttons */}
+                      <div className="flex items-center gap-2 pr-2">
+                        <span className="h-3 w-3 rounded-full bg-zinc-700 border border-black/60 shadow-[0_1px_0_rgba(255,255,255,0.02)]" />
+                        <span className="h-3 w-3 rounded-full bg-zinc-700 border border-black/60 shadow-[0_1px_0_rgba(255,255,255,0.02)]" />
+                        <span className="h-3 w-3 rounded-full bg-zinc-700 border border-black/60 shadow-[0_1px_0_rgba(255,255,255,0.02)]" />
+                      </div>
+
+                      {/* indicator lights */}
+                      <div className="flex items-center gap-2">
+                        <span className="h-2 w-2 rounded-full bg-blue-400 shadow-[0_0_8px_rgba(96,165,250,0.9)]" />
+                        <span className="h-2 w-2 rounded-full bg-blue-400 shadow-[0_0_8px_rgba(96,165,250,0.9)]" />
+                        <span className="h-2 w-2 rounded-full bg-blue-400 shadow-[0_0_8px_rgba(96,165,250,0.9)]" />
+                        <span className="h-2 w-2 rounded-full bg-blue-400 shadow-[0_0_8px_rgba(96,165,250,0.9)]" />
+                        <span className="ml-3 h-2 w-5 rounded-full bg-red-500 shadow-[0_0_12px_rgba(239,68,68,0.9)]" />
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
-            </div>
-
-            <div className="relative flex items-center justify-end gap-2 px-6 pt-3 pb-1">
-              <span className="mr-auto text-[10px] tracking-[0.25em] text-white/30">MILLENNIUM</span>
-              <span className="h-2 w-2 rounded-full bg-zinc-600" />
-              <span className="h-2 w-2 rounded-full bg-zinc-600" />
-              <span className="h-2 w-2 rounded-full bg-zinc-600" />
-              <span className="ml-3 h-2 w-2 rounded-full bg-blue-400 shadow-[0_0_10px_rgba(96,165,250,0.9)]" />
-              <span className="h-2 w-2 rounded-full bg-blue-400 shadow-[0_0_10px_rgba(96,165,250,0.9)]" />
-              <span className="h-2 w-2 rounded-full bg-blue-400 shadow-[0_0_10px_rgba(96,165,250,0.9)]" />
-              <span className="ml-3 h-2 w-5 rounded-full bg-red-500 shadow-[0_0_12px_rgba(239,68,68,0.9)]" />
             </div>
           </div>
         </div>
