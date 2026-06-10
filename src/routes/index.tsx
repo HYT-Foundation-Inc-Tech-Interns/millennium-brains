@@ -40,6 +40,7 @@ import {
   Hd,
   Cpu,
   ChevronDown,
+  Info,
 } from "lucide-react";
 import heroImg from "@/assets/millennium tv.png";
 import footerLogo from "@/assets/Logo Millennium Paltinum PNG.png";
@@ -49,6 +50,8 @@ import { SectionHeading } from "@/components/site/SectionHeading";
 import HeroWave from "@/components/site/HeroWave";
 import { IntroOverlay } from "@/components/IntroOverlay";
 import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "@/components/ui/accordion";
+import { Progress } from "@/components/ui/progress";
+import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -57,7 +60,7 @@ export const Route = createFileRoute("/")({
       {
         name: "description",
         content:
-          "Millennium is a smart interactive board that can do presentatiosn in the classroom, the confference room, in your home theater or anywhere that requires collaborative and engaging presentations",
+          "Millennium is a smart interactive board that can do presentations in the classroom, the conference room, in your home theater or anywhere that requires collaborative and engaging presentations",
       },
       { property: "og:title", content: "Millennium — Smart Technology for Modern Collaboration" },
       { property: "og:description", content: "Enterprise-grade smart technology solutions." },
@@ -1665,6 +1668,7 @@ function ExperienceInnovation({
   monthlySelectorRef: React.RefObject<HTMLDivElement | null>;
 }) {
   const leaseSectionRef = useRef<HTMLDivElement | null>(null);
+  const leaseFormRef = useRef<HTMLDivElement | null>(null);
   // Leasing form state
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
@@ -1678,6 +1682,8 @@ function ExperienceInnovation({
   const [packageOption, setPackageOption] = useState("");
   const [submitted, setSubmitted] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [leaseStep, setLeaseStep] = useState<1 | 2 | 3>(1);
+  const leaseStepLabels = ["Your details", "Schedule", "Package & Review"];
 
   // Book Demo form state (separate from leasing form)
   const [demoFullName, setDemoFullName] = useState("");
@@ -1792,6 +1798,57 @@ function ExperienceInnovation({
     const eMinutes = eh * 60 + em;
     return eMinutes > iMinutes;
   }
+
+  // Per-step validation for the lease wizard. Same rules as the submit handler,
+  // just partitioned by step. Returns the errors for that step only.
+  function getLeaseStepErrors(s: 1 | 2 | 3): Record<string, string> {
+    const e: Record<string, string> = {};
+    if (s === 1) {
+      if (!fullName.trim()) e.fullName = "Full name is required.";
+      if (!email.trim() || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) e.email = "Valid email is required.";
+      if (!phone.trim()) e.phone = "Phone number is required.";
+      if (!address.trim()) e.address = "Full address is required.";
+    }
+    if (s === 2) {
+      if (!date.trim()) e.date = "Date is required.";
+      if (!ingress.trim()) e.ingress = "Ingress time is required.";
+      if (!egress.trim()) e.egress = "Egress time is required.";
+      if (ingress.trim() && egress.trim()) {
+        const [ih, im] = ingress.split(":").map((v) => parseInt(v, 10) || 0);
+        const [eh, em] = egress.split(":").map((v) => parseInt(v, 10) || 0);
+        if (eh * 60 + em <= ih * 60 + im) e.egress = "Egress time must be later than Ingress time.";
+      }
+    }
+    if (s === 3) {
+      if (!leaseType) e.leaseType = "Lease type is required.";
+      if (!boardSize) e.boardSize = "Smart board size is required.";
+      if (!packageOption) e.packageOption = "Please select a package.";
+    }
+    return e;
+  }
+
+  // "Next" validates only the current step and blocks advancing if invalid.
+  function goLeaseNext() {
+    const e = getLeaseStepErrors(leaseStep);
+    setErrors(e);
+    if (Object.keys(e).length === 0 && leaseStep < 3) {
+      setLeaseStep((leaseStep + 1) as 1 | 2 | 3);
+    }
+  }
+
+  // "Select this plan" from a pricing table → prefill type + size, then scroll
+  // the user to the inquiry form. They still fill details/schedule and pick the
+  // package on the final step.
+  function selectPlan(type: "short" | "monthly", size: "65" | "86") {
+    setLeaseType(type);
+    setBoardSize(size);
+    setPackageOption("");
+    setErrors({});
+    requestAnimationFrame(() => {
+      leaseFormRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+  }
+
   const shortTermSizes = [
     {
       id: "65" as const,
@@ -1885,199 +1942,122 @@ function ExperienceInnovation({
 
                 <div className="space-y-8">
                   <section>
-                    <h4 className="font-semibold mb-2">SHORT-TERM LEASE (EVENTS / CONFERENCES)</h4>
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className="inline-flex items-center rounded-full bg-primary/10 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wide text-primary">Short-Term</span>
+                      <h4 className="font-semibold">Events / Conferences</h4>
+                    </div>
                     <p className="text-sm text-muted-foreground mb-4">Ideal for hotels and event organizers</p>
 
-                    <div ref={shortTermSelectorRef} className="relative inline-flex items-center">
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setShowShortTermSelector((value) => !value);
-                          setShowMonthlySelector(false);
-                        }}
-                        className="card-surface inline-flex items-center justify-between gap-4 rounded-3xl border border-border px-4 py-3 text-left shadow-none"
-                      >
-                        <div className="flex flex-col">
-                          <span className="text-sm font-semibold text-foreground">
-                            {selectedShortTermSize ? `${selectedShortTermSize} Inches` : "Select Smart Board Size"}
-                          </span>
-                          <span className="text-xs text-muted-foreground">Select Smart Board Size</span>
-                        </div>
-                        <span className="text-xs text-muted-foreground">▼</span>
-                      </button>
-
-                      {showShortTermSelector ? (
-                        <div className="card-surface absolute left-full top-1/2 z-20 ml-3 w-auto -translate-y-1/2 border border-border px-3 py-2 shadow-lg">
-                          <div className="flex gap-2">
-                            {shortTermSizes.map((size) => (
-                              <button
-                                key={size.id}
-                                type="button"
-                                onClick={() => {
-                                  setSelectedShortTermSize(size.id);
-                                  setShowShortTermSelector(false);
-                                }}
-                                className={`rounded-full border px-3 py-2 text-sm font-semibold transition ${
-                                  selectedShortTermSize === size.id
-                                    ? "border-primary text-foreground bg-primary/5"
-                                    : "border-border text-muted-foreground bg-background"
-                                }`}
-                              >
-                                {size.label}
-                              </button>
-                            ))}
-                          </div>
-                        </div>
-                      ) : null}
-                    </div>
-
-                    {selectedShortTermSize ? (
-                      <motion.div
-                        key={selectedShortTermSize}
-                        initial={{ opacity: 0, y: -8 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.25 }}
-                      >
-                        <table className="w-full min-w-[720px] text-sm border-separate border-spacing-x-4">
-                          <thead>
-                            <tr className="text-xs text-muted-foreground text-left uppercase tracking-[0.03em]">
-                              <th className="whitespace-nowrap px-4 py-3 font-semibold">Unit Size</th>
-                              <th className="whitespace-nowrap px-4 py-3 font-semibold">Daily Rate (5 Hours)</th>
-                              <th className="whitespace-nowrap px-4 py-3 font-semibold">3 Days</th>
-                              <th className="whitespace-nowrap px-4 py-3 font-semibold">7 Days</th>
+                    <div className="overflow-x-auto rounded-xl border border-border">
+                      <table className="w-full min-w-[680px] text-sm">
+                        <thead>
+                          <tr className="bg-secondary/40 text-[11px] uppercase tracking-wide text-muted-foreground">
+                            <th className="px-4 py-3 text-left font-semibold">Unit Size</th>
+                            <th className="px-4 py-3 text-right font-semibold">Daily (5 Hrs)</th>
+                            <th className="px-4 py-3 text-right font-semibold">3 Days</th>
+                            <th className="px-4 py-3 text-right font-semibold">7 Days</th>
+                            <th className="px-4 py-3 text-right font-semibold sr-only">Action</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {shortTermSizes.map((size) => (
+                            <tr key={size.id} className="border-t border-border transition-colors hover:bg-secondary/20">
+                              <td className="px-4 py-4">
+                                <div className="flex items-center gap-2 font-semibold text-foreground">
+                                  <Monitor className="w-4 h-4 text-primary shrink-0" /> {size.label}
+                                </div>
+                              </td>
+                              <td className="px-4 py-4 text-right font-medium tabular-nums">{size.details.daily}</td>
+                              <td className="px-4 py-4 text-right font-medium tabular-nums">{size.details.threeDay}</td>
+                              <td className="px-4 py-4 text-right font-medium tabular-nums">{size.details.sevenDay}</td>
+                              <td className="px-4 py-4 text-right">
+                                <button
+                                  type="button"
+                                  onClick={() => selectPlan("short", size.id)}
+                                  className="whitespace-nowrap rounded-full border border-primary/60 bg-primary/10 px-4 py-2 text-xs font-semibold text-primary transition hover:bg-primary/20"
+                                >
+                                  Select Plan
+                                </button>
+                              </td>
                             </tr>
-                          </thead>
-                          <tbody className="divide-y divide-border">
-                            {shortTermSizes
-                              .filter((size) => size.id === selectedShortTermSize)
-                              .map((size) => (
-                                <tr key={size.id}>
-                                  <td className="px-4 py-4 font-medium">{size.label}</td>
-                                  <td className="px-4 py-4">{size.details.daily}</td>
-                                  <td className="px-4 py-4">{size.details.threeDay}</td>
-                                  <td className="px-4 py-4">{size.details.sevenDay}</td>
-                                </tr>
-                              ))}
-                          </tbody>
-                        </table>
-                      </motion.div>
-                    ) : null}
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
                   </section>
 
                   <section>
-                    <h4 className="font-semibold mb-2">MONTHLY LEASE (ORGANIZATIONS / OFFICES)</h4>
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className="inline-flex items-center rounded-full bg-primary/10 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wide text-primary">Monthly</span>
+                      <h4 className="font-semibold">Organizations / Offices</h4>
+                    </div>
                     <p className="text-sm text-muted-foreground mb-4">Enterprise-grade leasing for sustained deployments</p>
 
-                    <div ref={monthlySelectorRef} className="relative inline-flex items-center">
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setShowMonthlySelector((value) => !value);
-                          setShowShortTermSelector(false);
-                        }}
-                        className="card-surface inline-flex items-center justify-between gap-4 rounded-3xl border border-border px-4 py-3 text-left shadow-none"
-                      >
-                        <div className="flex flex-col">
-                          <span className="text-sm font-semibold text-foreground">
-                            {selectedMonthlySize ? `${selectedMonthlySize} Inches` : "Select Smart Board Size"}
-                          </span>
-                          <span className="text-xs text-muted-foreground">Select Smart Board Size</span>
-                        </div>
-                        <span className="text-xs text-muted-foreground">▼</span>
-                      </button>
-
-                      {showMonthlySelector ? (
-                        <div className="card-surface absolute left-full top-1/2 z-20 ml-3 w-auto -translate-y-1/2 border border-border px-3 py-2 shadow-lg">
-                          <div className="flex gap-2">
-                            {monthlySizes.map((size) => (
-                              <button
-                                key={size.id}
-                                type="button"
-                                onClick={() => {
-                                  setSelectedMonthlySize(size.id);
-                                  setShowMonthlySelector(false);
-                                }}
-                                className={`rounded-full border px-3 py-2 text-sm font-semibold transition ${
-                                  selectedMonthlySize === size.id
-                                    ? "border-primary text-foreground bg-primary/5"
-                                    : "border-border text-muted-foreground bg-background"
-                                }`}
-                              >
-                                {size.label}
-                              </button>
-                            ))}
-                          </div>
-                        </div>
-                      ) : null}
-                    </div>
-
-                    {selectedMonthlySize ? (
-                      <motion.div
-                        key={selectedMonthlySize}
-                        initial={{ opacity: 0, y: -8 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.25 }}
-                      >
-                        <table className="w-full min-w-[720px] text-sm border-separate border-spacing-x-4">
-                          <thead>
-                            <tr className="text-xs text-muted-foreground text-left uppercase tracking-[0.03em]">
-                              <th className="whitespace-nowrap px-4 py-3 font-semibold">Unit Size</th>
-                              <th className="whitespace-nowrap px-4 py-3 font-semibold">Monthly Rate</th>
-                              <th className="whitespace-nowrap px-4 py-3 font-semibold">6 Months Contract</th>
-                              <th className="whitespace-nowrap px-4 py-3 font-semibold">12 Months Contract</th>
+                    <div className="overflow-x-auto rounded-xl border border-border">
+                      <table className="w-full min-w-[680px] text-sm">
+                        <thead>
+                          <tr className="bg-secondary/40 text-[11px] uppercase tracking-wide text-muted-foreground">
+                            <th className="px-4 py-3 text-left font-semibold">Unit Size</th>
+                            <th className="px-4 py-3 text-right font-semibold">Monthly Rate</th>
+                            <th className="px-4 py-3 text-right font-semibold">6-Month</th>
+                            <th className="px-4 py-3 text-right font-semibold">12-Month</th>
+                            <th className="px-4 py-3 text-right font-semibold sr-only">Action</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {monthlySizes.map((size) => (
+                            <tr key={size.id} className="border-t border-border transition-colors hover:bg-secondary/20">
+                              <td className="px-4 py-4">
+                                <div className="flex items-center gap-2 font-semibold text-foreground">
+                                  <Monitor className="w-4 h-4 text-primary shrink-0" /> {size.label}
+                                </div>
+                              </td>
+                              <td className="px-4 py-4 text-right font-medium tabular-nums">{size.details.monthly}</td>
+                              <td className="px-4 py-4 text-right font-medium tabular-nums">{size.details.sixMonth}</td>
+                              <td className="px-4 py-4 text-right font-medium tabular-nums">{size.details.twelveMonth}</td>
+                              <td className="px-4 py-4 text-right">
+                                <button
+                                  type="button"
+                                  onClick={() => selectPlan("monthly", size.id)}
+                                  className="whitespace-nowrap rounded-full border border-primary/60 bg-primary/10 px-4 py-2 text-xs font-semibold text-primary transition hover:bg-primary/20"
+                                >
+                                  Select Plan
+                                </button>
+                              </td>
                             </tr>
-                          </thead>
-                          <tbody className="divide-y divide-border">
-                            {monthlySizes
-                              .filter((size) => size.id === selectedMonthlySize)
-                              .map((size) => (
-                                <tr key={size.id}>
-                                  <td className="px-4 py-4 font-medium">{size.label}</td>
-                                  <td className="px-4 py-4">{size.details.monthly}</td>
-                                  <td className="px-4 py-4">{size.details.sixMonth}</td>
-                                  <td className="px-4 py-4">{size.details.twelveMonth}</td>
-                                </tr>
-                              ))}
-                          </tbody>
-                        </table>
-                      </motion.div>
-                    ) : null}
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
                   </section>
                 </div>
               </div>
 
               {/* Leasing Inquiry Form */}
-              <div className="card-surface p-6 mt-6">
+              <div ref={leaseFormRef} className="card-surface p-6 mt-6 scroll-mt-24">
                 <div className="text-sm text-muted-foreground mb-4">Leasing Inquiry Form</div>
+
+                {!submitted && leaseType && boardSize ? (
+                  <div className="mb-4 flex items-center gap-2 rounded-lg border border-primary/40 bg-primary/5 px-4 py-3 text-sm">
+                    <span>
+                      Selected plan:{" "}
+                      <span className="font-semibold text-foreground">
+                        {leaseType === "short" ? "Short-Term Lease" : "Monthly Lease"} · {boardSize} Inches
+                      </span>
+                    </span>
+                  </div>
+                ) : null}
 
                 {!submitted ? (
                   <form
                     onSubmit={(e) => {
                       e.preventDefault();
-                      const nextErrors: Record<string, string> = {};
-                      if (!fullName.trim()) nextErrors.fullName = "Full name is required.";
-                      if (!email.trim() || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) nextErrors.email = "Valid email is required.";
-                      if (!phone.trim()) nextErrors.phone = "Phone number is required.";
-                      if (!date.trim()) nextErrors.date = "Date is required.";
-                      if (!ingress.trim()) nextErrors.ingress = "Ingress time is required.";
-                      if (!egress.trim()) nextErrors.egress = "Egress time is required.";
-                      if (!address.trim()) nextErrors.address = "Full address is required.";
-                      if (!leaseType) nextErrors.leaseType = "Lease type is required.";
-                      if (!boardSize) nextErrors.boardSize = "Smart board size is required.";
-                      if (!packageOption) nextErrors.packageOption = "Please select a package.";
-                      // Terms agreement removed from Lease Now
-
-                      // validate ingress < egress
-                      if (ingress.trim() && egress.trim()) {
-                        const [ih, im] = ingress.split(":").map((v) => parseInt(v, 10) || 0);
-                        const [eh, em] = egress.split(":").map((v) => parseInt(v, 10) || 0);
-                        const iMinutes = ih * 60 + im;
-                        const eMinutes = eh * 60 + em;
-                        if (eMinutes <= iMinutes) {
-                          nextErrors.egress = "Egress time must be later than Ingress time.";
-                        }
-                      }
-
+                      // Final submit re-validates every step (same rules as before).
+                      const nextErrors = {
+                        ...getLeaseStepErrors(1),
+                        ...getLeaseStepErrors(2),
+                        ...getLeaseStepErrors(3),
+                      };
                       setErrors(nextErrors);
 
                       if (Object.keys(nextErrors).length === 0) {
@@ -2087,133 +2067,180 @@ function ExperienceInnovation({
                     }}
                     className="space-y-4"
                   >
-                    <div className="grid md:grid-cols-2 gap-4">
-                      <div>
-                        <label className="text-sm font-medium flex items-center gap-2">
-                          <User className="w-4 h-4 text-primary" /> Full Name
-                        </label>
-                        <input value={fullName} onChange={(e) => setFullName(e.target.value)} className="mt-2 w-full bg-input border border-border rounded-lg px-4 py-3 text-sm" />
-                        {errors.fullName ? <div className="text-xs text-red-400 mt-1">{errors.fullName}</div> : null}
-                      </div>
-
-                      <div>
-                        <label className="text-sm font-medium flex items-center gap-2">
-                          <Mail className="w-4 h-4 text-primary" /> Email Address
-                        </label>
-                        <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} className="mt-2 w-full bg-input border border-border rounded-lg px-4 py-3 text-sm" />
-                        {errors.email ? <div className="text-xs text-red-400 mt-1">{errors.email}</div> : null}
-                      </div>
-                    </div>
-
-                    <div className="grid md:grid-cols-2 gap-4">
-                      <div>
-                        <label className="text-sm font-medium flex items-center gap-2">
-                          <Phone className="w-4 h-4 text-primary" /> Phone Number
-                        </label>
-                        <input value={phone} onChange={(e) => setPhone(e.target.value)} className="mt-2 w-full bg-input border border-border rounded-lg px-4 py-3 text-sm" />
-                        {errors.phone ? <div className="text-xs text-red-400 mt-1">{errors.phone}</div> : null}
-                      </div>
-
-                      <div>
-                        <label className="text-sm font-medium flex items-center gap-2">
-                          <Calendar className="w-4 h-4 text-primary" /> Date <span className="text-xs text-muted-foreground ml-2">(DD/MM/YYYY)</span>
-                        </label>
-                        <input type="date" value={date} onChange={(e) => setDate(e.target.value)} className="mt-2 w-full bg-input border border-border rounded-lg px-4 py-3 text-sm" />
-                        {errors.date ? <div className="text-xs text-red-400 mt-1">{errors.date}</div> : null}
-                      </div>
-                    </div>
-
+                    {/* Step progress */}
                     <div>
-                      <label className="text-sm font-medium">Full Address</label>
-                      <input value={address} onChange={(e) => setAddress(e.target.value)} className="mt-2 w-full bg-input border border-border rounded-lg px-4 py-3 text-sm" />
-                      {errors.address ? <div className="text-xs text-red-400 mt-1">{errors.address}</div> : null}
+                      <div className="flex items-center justify-between mb-2">
+                        <div className="text-sm font-medium">
+                          Step {leaseStep} of 3 · <span className="text-muted-foreground">{leaseStepLabels[leaseStep - 1]}</span>
+                        </div>
+                        <div className="text-xs text-muted-foreground">{Math.round((leaseStep / 3) * 100)}%</div>
+                      </div>
+                      <Progress value={(leaseStep / 3) * 100} />
                     </div>
 
-                     <div className="grid md:grid-cols-2 gap-4">
+                    {/* Step 1 — Your details */}
+                    {leaseStep === 1 ? (
+                      <div className="space-y-4">
+                        <div className="grid md:grid-cols-2 gap-4">
+                          <div>
+                            <label className="text-sm font-medium flex items-center gap-2">
+                              <User className="w-4 h-4 text-primary" /> Full Name
+                            </label>
+                            <input value={fullName} onChange={(e) => setFullName(e.target.value)} className="mt-2 w-full bg-input border border-border rounded-lg px-4 py-3 text-sm" />
+                            {errors.fullName ? <div className="text-xs text-red-400 mt-1">{errors.fullName}</div> : null}
+                          </div>
+
+                          <div>
+                            <label className="text-sm font-medium flex items-center gap-2">
+                              <Mail className="w-4 h-4 text-primary" /> Email Address
+                            </label>
+                            <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} className="mt-2 w-full bg-input border border-border rounded-lg px-4 py-3 text-sm" />
+                            {errors.email ? <div className="text-xs text-red-400 mt-1">{errors.email}</div> : null}
+                          </div>
+                        </div>
+
+                        <div className="grid md:grid-cols-2 gap-4">
+                          <div>
+                            <label className="text-sm font-medium flex items-center gap-2">
+                              <Phone className="w-4 h-4 text-primary" /> Phone Number
+                            </label>
+                            <input value={phone} onChange={(e) => setPhone(e.target.value)} className="mt-2 w-full bg-input border border-border rounded-lg px-4 py-3 text-sm" />
+                            {errors.phone ? <div className="text-xs text-red-400 mt-1">{errors.phone}</div> : null}
+                          </div>
+
+                          <div>
+                            <label className="text-sm font-medium">Full Address</label>
+                            <input value={address} onChange={(e) => setAddress(e.target.value)} className="mt-2 w-full bg-input border border-border rounded-lg px-4 py-3 text-sm" />
+                            {errors.address ? <div className="text-xs text-red-400 mt-1">{errors.address}</div> : null}
+                          </div>
+                        </div>
+                      </div>
+                    ) : null}
+
+                    {/* Step 2 — Schedule */}
+                    {leaseStep === 2 ? (
+                      <div className="space-y-4">
                         <div>
                           <label className="text-sm font-medium flex items-center gap-2">
-                            <Clock className="w-4 h-4 text-primary" /> Ingress <span className="text-xs text-muted-foreground ml-2">e.g. 1:00 PM</span>
+                            <Calendar className="w-4 h-4 text-primary" /> Date <span className="text-xs text-muted-foreground ml-2">(DD/MM/YYYY)</span>
                           </label>
-                          <input type="time" value={ingress} onChange={(e) => setIngress(e.target.value)} className="mt-2 w-full bg-input border border-border rounded-lg px-4 py-3 text-sm" />
-                          {errors.ingress ? <div className="text-xs text-red-400 mt-1">{errors.ingress}</div> : null}
+                          <input type="date" value={date} onChange={(e) => setDate(e.target.value)} className="mt-2 w-full bg-input border border-border rounded-lg px-4 py-3 text-sm" />
+                          {errors.date ? <div className="text-xs text-red-400 mt-1">{errors.date}</div> : null}
+                        </div>
+
+                        <div className="grid md:grid-cols-2 gap-4">
+                          <div>
+                            <label className="text-sm font-medium flex items-center gap-2 flex-wrap">
+                              <span className="flex items-center gap-2"><Clock className="w-4 h-4 text-primary" /> Ingress</span>
+                              <span className="text-xs font-normal text-muted-foreground">setup / arrival · e.g. 1:00 PM</span>
+                            </label>
+                            <input type="time" value={ingress} onChange={(e) => setIngress(e.target.value)} className="mt-2 w-full bg-input border border-border rounded-lg px-4 py-3 text-sm" />
+                            {errors.ingress ? <div className="text-xs text-red-400 mt-1">{errors.ingress}</div> : null}
+                          </div>
+
+                          <div>
+                            <label className="text-sm font-medium flex items-center gap-2 flex-wrap">
+                              <span className="flex items-center gap-2"><Clock className="w-4 h-4 text-primary" /> Egress</span>
+                              <span className="text-xs font-normal text-muted-foreground">teardown / departure · e.g. 6:00 PM</span>
+                            </label>
+                            <input type="time" value={egress} onChange={(e) => setEgress(e.target.value)} className="mt-2 w-full bg-input border border-border rounded-lg px-4 py-3 text-sm" />
+                            {errors.egress ? <div className="text-xs text-red-400 mt-1">{errors.egress}</div> : null}
+                          </div>
+                        </div>
+                      </div>
+                    ) : null}
+
+                    {/* Step 3 — Package & Review */}
+                    {leaseStep === 3 ? (
+                      <div className="space-y-4">
+                        <div className="grid md:grid-cols-2 gap-4">
+                          <div>
+                            <label className="text-sm font-medium">Lease Type</label>
+                            <select value={leaseType} onChange={(e) => { const v = e.target.value as "short" | "monthly" | ""; setLeaseType(v); setPackageOption(""); }} className="mt-2 w-full bg-input border border-border rounded-lg px-4 py-3 text-sm focus:bg-black focus:outline-none">
+                              <option value="">Select lease type</option>
+                              <option value="short">Short-Term Lease (Events / Conferences)</option>
+                              <option value="monthly">Monthly Lease (Organizations / Offices)</option>
+                            </select>
+                            {errors.leaseType ? <div className="text-xs text-red-400 mt-1">{errors.leaseType}</div> : null}
+                          </div>
+
+                          <div>
+                            <label className="text-sm font-medium">Smart Board Size</label>
+                            <select value={boardSize} onChange={(e) => setBoardSize(e.target.value as "65" | "86" | "")} className="mt-2 w-full bg-input border border-border rounded-lg px-4 py-3 text-sm focus:bg-black focus:outline-none">
+                              <option value="">Select size</option>
+                              <option value="65">65 Inches</option>
+                              <option value="86">86 Inches</option>
+                            </select>
+                            {errors.boardSize ? <div className="text-xs text-red-400 mt-1">{errors.boardSize}</div> : null}
+                          </div>
                         </div>
 
                         <div>
-                          <label className="text-sm font-medium flex items-center gap-2">
-                            <Clock className="w-4 h-4 text-primary" /> Egress <span className="text-xs text-muted-foreground ml-2">e.g. 6:00 PM</span>
-                          </label>
-                          <input type="time" value={egress} onChange={(e) => setEgress(e.target.value)} className="mt-2 w-full bg-input border border-border rounded-lg px-4 py-3 text-sm" />
-                          {errors.egress ? <div className="text-xs text-red-400 mt-1">{errors.egress}</div> : null}
+                          <label className="text-sm font-medium">{leaseType === "monthly" ? "Contract Duration" : "Package"}</label>
+                          <div className="mt-3 flex flex-wrap gap-2">
+                            {leaseType === "monthly" ? (
+                              [
+                                { id: "monthly_rate", label: "Monthly Rate" },
+                                { id: "6_months", label: "6 Months Contract" },
+                                { id: "12_months", label: "12 Months Contract" },
+                              ].map((p) => (
+                                <button key={p.id} type="button" onClick={() => setPackageOption(p.label)} className={`rounded-full border px-3 py-2 text-sm font-semibold transition ${packageOption === p.label ? "border-primary text-foreground bg-primary/5" : "border-border text-muted-foreground bg-background"}`}>
+                                  {p.label}
+                                </button>
+                              ))
+                            ) : (
+                              [
+                                { id: "daily", label: "Daily Rate (5 Hours)" },
+                                { id: "3_days", label: "3 Days" },
+                                { id: "7_days", label: "7 Days" },
+                              ].map((p) => (
+                                <button key={p.id} type="button" onClick={() => setPackageOption(p.label)} className={`rounded-full border px-3 py-2 text-sm font-semibold transition ${packageOption === p.label ? "border-primary text-foreground bg-primary/5" : "border-border text-muted-foreground bg-background"}`}>
+                                  {p.label}
+                                </button>
+                              ))
+                            )}
+                          </div>
+                          {errors.packageOption ? <div className="text-xs text-red-400 mt-1">{errors.packageOption}</div> : null}
+                        </div>
+
+                        <div className="card-surface p-4 rounded-lg border border-border">
+                          <div className="font-semibold text-sm mb-2">LEASE SUMMARY</div>
+                          <div className="text-sm text-muted-foreground">
+                            <div>Lease Type: <span className="text-foreground font-medium">{leaseType === "short" ? "Short-Term Lease" : leaseType === "monthly" ? "Monthly Lease" : "—"}</span></div>
+                            <div>Display Size: <span className="text-foreground font-medium">{boardSize ? `${boardSize} Inches` : "—"}</span></div>
+                            <div>Selected Package: <span className="text-foreground font-medium">{packageOption || "—"}</span></div>
+                            <div className="flex items-center gap-1.5">
+                              <span>Estimated Price:</span>
+                              <span className="text-foreground font-medium">{getEstimatedPrice()}</span>
+                              <InfoHint label="About this estimate">
+                                This is an estimate based on your selected size and package. Your final quotation is confirmed by our team and may vary with delivery, setup, or add-ons.
+                              </InfoHint>
+                            </div>
+                            <div>Ingress: <span className="text-foreground font-medium">{ingress ? formatTime12(ingress) : "—"}</span></div>
+                            <div>Egress: <span className="text-foreground font-medium">{egress ? formatTime12(egress) : "—"}</span></div>
+                          </div>
                         </div>
                       </div>
+                    ) : null}
 
-                    <div className="grid md:grid-cols-2 gap-4">
-                      <div>
-                        <label className="text-sm font-medium">Lease Type</label>
-                        <select value={leaseType} onChange={(e) => { const v = e.target.value as "short" | "monthly" | ""; setLeaseType(v); setPackageOption(""); }} className="mt-2 w-full bg-input border border-border rounded-lg px-4 py-3 text-sm focus:bg-black focus:outline-none">
-                          <option value="">Select lease type</option>
-                          <option value="short">Short-Term Lease (Events / Conferences)</option>
-                          <option value="monthly">Monthly Lease (Organizations / Offices)</option>
-                        </select>
-                        {errors.leaseType ? <div className="text-xs text-red-400 mt-1">{errors.leaseType}</div> : null}
-                      </div>
+                    {/* Wizard navigation */}
+                    <div className="flex gap-3 pt-2">
+                      {leaseStep > 1 ? (
+                        <button type="button" onClick={() => setLeaseStep((leaseStep - 1) as 1 | 2 | 3)} className="btn-ghost flex-1">
+                          <ArrowLeft className="w-4 h-4" /> Back
+                        </button>
+                      ) : null}
 
-                      <div>
-                        <label className="text-sm font-medium">Smart Board Size</label>
-                        <select value={boardSize} onChange={(e) => setBoardSize(e.target.value as "65" | "86" | "")} className="mt-2 w-full bg-input border border-border rounded-lg px-4 py-3 text-sm focus:bg-black focus:outline-none">
-                          <option value="">Select size</option>
-                          <option value="65">65 Inches</option>
-                          <option value="86">86 Inches</option>
-                        </select>
-                        {errors.boardSize ? <div className="text-xs text-red-400 mt-1">{errors.boardSize}</div> : null}
-                      </div>
+                      {leaseStep < 3 ? (
+                        <button type="button" onClick={goLeaseNext} className="btn-primary flex-1">
+                          Next <ArrowRight className="w-4 h-4" />
+                        </button>
+                      ) : (
+                        <button type="submit" disabled={!isFormValid()} className={`btn-primary flex-1 ${!isFormValid() ? "opacity-60 cursor-not-allowed" : ""}`}>
+                          REQUEST LEASE QUOTATION
+                        </button>
+                      )}
                     </div>
-
-                    <div>
-                      <label className="text-sm font-medium">{leaseType === "monthly" ? "Contract Duration" : "Package"}</label>
-                      <div className="mt-3 flex flex-wrap gap-2">
-                        {leaseType === "monthly" ? (
-                          [
-                            { id: "monthly_rate", label: "Monthly Rate" },
-                            { id: "6_months", label: "6 Months Contract" },
-                            { id: "12_months", label: "12 Months Contract" },
-                          ].map((p) => (
-                            <button key={p.id} type="button" onClick={() => setPackageOption(p.label)} className={`rounded-full border px-3 py-2 text-sm font-semibold transition ${packageOption === p.label ? "border-primary text-foreground bg-primary/5" : "border-border text-muted-foreground bg-background"}`}>
-                              {p.label}
-                            </button>
-                          ))
-                        ) : (
-                          [
-                            { id: "daily", label: "Daily Rate (5 Hours)" },
-                            { id: "3_days", label: "3 Days" },
-                            { id: "7_days", label: "7 Days" },
-                          ].map((p) => (
-                            <button key={p.id} type="button" onClick={() => setPackageOption(p.label)} className={`rounded-full border px-3 py-2 text-sm font-semibold transition ${packageOption === p.label ? "border-primary text-foreground bg-primary/5" : "border-border text-muted-foreground bg-background"}`}>
-                              {p.label}
-                            </button>
-                          ))
-                        )}
-                      </div>
-                      {errors.packageOption ? <div className="text-xs text-red-400 mt-1">{errors.packageOption}</div> : null}
-                    </div>
-
-                    <div className="card-surface p-4 rounded-lg border border-border">
-                      <div className="font-semibold text-sm mb-2">LEASE SUMMARY</div>
-                      <div className="text-sm text-muted-foreground">
-                        <div>Lease Type: <span className="text-foreground font-medium">{leaseType === "short" ? "Short-Term Lease" : leaseType === "monthly" ? "Monthly Lease" : "—"}</span></div>
-                        <div>Display Size: <span className="text-foreground font-medium">{boardSize ? `${boardSize} Inches` : "—"}</span></div>
-                        <div>Selected Package: <span className="text-foreground font-medium">{packageOption || "—"}</span></div>
-                        <div>Estimated Price: <span className="text-foreground font-medium">{getEstimatedPrice()}</span></div>
-                        <div>Ingress: <span className="text-foreground font-medium">{ingress ? formatTime12(ingress) : "—"}</span></div>
-                        <div>Egress: <span className="text-foreground font-medium">{egress ? formatTime12(egress) : "—"}</span></div>
-                      </div>
-                    </div>
-
-                    
-
-                    <button type="submit" disabled={!isFormValid()} className={`btn-primary w-full ${!isFormValid() ? "opacity-60 cursor-not-allowed" : ""}`}>
-                      REQUEST LEASE QUOTATION
-                    </button>
                   </form>
                 ) : (
                   <div className="p-6 text-center">
@@ -2490,6 +2517,28 @@ function ExperienceInnovation({
       </div>
     </StarfieldSection>
     
+  );
+}
+
+// Small tap-friendly info bubble (Popover opens on click/tap, so it works on
+// mobile too — unlike a hover-only tooltip). Use for optional context, not
+// essential instructions.
+function InfoHint({ children, label = "More information" }: { children: ReactNode; label?: string }) {
+  return (
+    <Popover>
+      <PopoverTrigger asChild>
+        <button
+          type="button"
+          aria-label={label}
+          className="inline-flex items-center justify-center align-middle text-muted-foreground transition-colors hover:text-foreground"
+        >
+          <Info className="w-3.5 h-3.5" />
+        </button>
+      </PopoverTrigger>
+      <PopoverContent align="start" className="w-64 text-sm text-muted-foreground">
+        {children}
+      </PopoverContent>
+    </Popover>
   );
 }
 
