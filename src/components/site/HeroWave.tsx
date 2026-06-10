@@ -1,14 +1,21 @@
-import React, { useEffect, useRef } from 'react';
+import { useEffect, useRef } from 'react';
 
 const HeroWave = () => {
-  const canvasRef = useRef(null);
+  const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
   useEffect(() => {
     const canvas = canvasRef.current;
+    if (!canvas) return;
     const ctx = canvas.getContext('2d');
+    if (!ctx) return;
 
-    let width, height, imageData, data;
-    const SCALE = 2;
+    let width = 0;
+    let height = 0;
+    let imageData: ImageData;
+    let data: Uint8ClampedArray;
+    // Lower internal resolution = far less per-pixel work. The wave is smooth,
+    // so upscaling is visually indistinguishable.
+    const SCALE = 3;
 
     const resizeCanvas = () => {
       canvas.width = window.innerWidth;
@@ -32,17 +39,17 @@ const HeroWave = () => {
       COS_TABLE[i] = Math.cos(angle);
     }
 
-    const fastSin = (x) => {
+    const fastSin = (x: number) => {
       const index = Math.floor(((x % (Math.PI * 2)) / (Math.PI * 2)) * 1024) & 1023;
       return SIN_TABLE[index];
     };
 
-    const fastCos = (x) => {
+    const fastCos = (x: number) => {
       const index = Math.floor(((x % (Math.PI * 2)) / (Math.PI * 2)) * 1024) & 1023;
       return COS_TABLE[index];
     };
 
-    const render = () => {
+    const renderFrame = () => {
       const time = (Date.now() - startTime) * 0.001;
 
       for (let y = 0; y < height; y++) {
@@ -81,13 +88,69 @@ const HeroWave = () => {
         ctx.imageSmoothingEnabled = false;
         ctx.drawImage(canvas, 0, 0, width, height, 0, 0, canvas.width, canvas.height);
       }
-
-      requestAnimationFrame(render);
     };
 
-    render();
+    const prefersReducedMotion =
+      typeof window.matchMedia === 'function' &&
+      window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-    return () => window.removeEventListener('resize', resizeCanvas);
+    // Throttle to ~30fps — the wave moves slowly, so this halves CPU cost
+    // with no perceptible difference.
+    const FRAME_INTERVAL = 1000 / 30;
+    let rafId = 0;
+    let lastFrame = 0;
+    let running = false;
+
+    const loop = (now: number) => {
+      rafId = requestAnimationFrame(loop);
+      if (now - lastFrame < FRAME_INTERVAL) return;
+      lastFrame = now;
+      renderFrame();
+    };
+
+    const start = () => {
+      if (running) return;
+      running = true;
+      lastFrame = 0;
+      rafId = requestAnimationFrame(loop);
+    };
+
+    const stop = () => {
+      running = false;
+      cancelAnimationFrame(rafId);
+    };
+
+    if (prefersReducedMotion) {
+      // Render a single static frame and never animate.
+      renderFrame();
+      return () => window.removeEventListener('resize', resizeCanvas);
+    }
+
+    // Animate only while the hero is on-screen AND the tab is visible.
+    let inView = false;
+
+    const update = () => {
+      if (inView && !document.hidden) start();
+      else stop();
+    };
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        inView = entry.isIntersecting;
+        update();
+      },
+      { threshold: 0 },
+    );
+    observer.observe(canvas);
+
+    document.addEventListener('visibilitychange', update);
+
+    return () => {
+      stop();
+      observer.disconnect();
+      window.removeEventListener('resize', resizeCanvas);
+      document.removeEventListener('visibilitychange', update);
+    };
   }, []);
 
   return <canvas ref={canvasRef} className="absolute inset-0 w-full h-full" />;
