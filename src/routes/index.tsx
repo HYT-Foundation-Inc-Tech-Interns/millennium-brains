@@ -943,6 +943,10 @@ function VideoShowcase() {
     const video = videoRef.current;
     if (!video) return;
 
+    // Set muted imperatively (not via JSX) so React re-renders don't
+    // re-mute the video after the user unmutes it through the controls.
+    video.muted = true;
+
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
@@ -982,7 +986,6 @@ function VideoShowcase() {
                 <video
                   ref={videoRef}
                   className="h-full w-full object-cover"
-                  muted
                   autoPlay
                   loop
                   playsInline
@@ -1397,12 +1400,6 @@ function Solutions() {
               </div>
               <h3 className="mt-5 text-lg font-semibold">{s.title}</h3>
               <p className="mt-2 text-sm text-muted-foreground leading-relaxed">{s.desc}</p>
-              <a
-                href="#contact"
-                className="mt-5 inline-flex items-center gap-1.5 text-sm text-primary font-medium"
-              >
-                Learn More <ArrowRight className="w-3.5 h-3.5" />
-              </a>
             </div>
           ))}
         </div>

@@ -113,3 +113,4 @@ Check phone (~375px), tablet (~768px), desktop (~1440px):
 - going to lease now or book demo, I cannot go back to solutions, product, use cases, etc
 - website is not responsive yet
 - Logo in header is a bit small
+- Lease now contents to fix pa

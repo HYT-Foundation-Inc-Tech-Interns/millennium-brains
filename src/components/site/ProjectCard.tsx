@@ -50,8 +50,16 @@ export function ProjectCard({ project }: { project: Project }) {
 
   const cycleImage = (direction: number) => {
     directionRef.current = direction;
-    setActiveIndex((current) => (current + direction + imageCount) % imageCount);
+    setActiveIndex((current) => {
+      const next = current + direction;
+      // Clamp at the ends so an arrow never moves to a non-existent image.
+      if (next < 0 || next >= imageCount) return current;
+      return next;
+    });
   };
+
+  const hasPrev = activeIndex > 0;
+  const hasNext = activeIndex < imageCount - 1;
 
   return (
     <motion.div className="card-surface overflow-hidden group">
@@ -81,29 +89,33 @@ export function ProjectCard({ project }: { project: Project }) {
             <div className="absolute inset-x-0 bottom-0 h-[50px] bg-black/50" />
             <div className="relative w-full px-4">
               <div className="h-[50px] flex justify-end items-center gap-3">
-                <motion.button
-                  type="button"
-                  onClick={() => cycleImage(-1)}
-                  className="pointer-events-auto inline-flex h-[32px] w-[32px] items-center justify-center rounded-full text-white/65 transition duration-300 ease-in-out hover:opacity-100 focus:outline-none"
-                  whileHover={{ scale: 1.05, opacity: 1 }}
-                  whileTap={{ scale: 0.96 }}
-                  aria-label="Previous image"
-                >
-                  <ArrowIcon direction="left" />
-                </motion.button>
+                {hasPrev ? (
+                  <motion.button
+                    type="button"
+                    onClick={() => cycleImage(-1)}
+                    className="pointer-events-auto inline-flex h-[32px] w-[32px] items-center justify-center rounded-full text-white/65 transition duration-300 ease-in-out hover:opacity-100 focus:outline-none"
+                    whileHover={{ scale: 1.05, opacity: 1 }}
+                    whileTap={{ scale: 0.96 }}
+                    aria-label="Previous image"
+                  >
+                    <ArrowIcon direction="left" />
+                  </motion.button>
+                ) : null}
 
-                <div className="h-[32px] w-px bg-white/65" />
+                {hasPrev && hasNext ? <div className="h-[32px] w-px bg-white/65" /> : null}
 
-                <motion.button
-                  type="button"
-                  onClick={() => cycleImage(1)}
-                  className="pointer-events-auto inline-flex h-[32px] w-[32px] items-center justify-center rounded-full text-white/65 transition duration-300 ease-in-out hover:opacity-100 focus:outline-none"
-                  whileHover={{ scale: 1.05, opacity: 1 }}
-                  whileTap={{ scale: 0.96 }}
-                  aria-label="Next image"
-                >
-                  <ArrowIcon direction="right" />
-                </motion.button>
+                {hasNext ? (
+                  <motion.button
+                    type="button"
+                    onClick={() => cycleImage(1)}
+                    className="pointer-events-auto inline-flex h-[32px] w-[32px] items-center justify-center rounded-full text-white/65 transition duration-300 ease-in-out hover:opacity-100 focus:outline-none"
+                    whileHover={{ scale: 1.05, opacity: 1 }}
+                    whileTap={{ scale: 0.96 }}
+                    aria-label="Next image"
+                  >
+                    <ArrowIcon direction="right" />
+                  </motion.button>
+                ) : null}
               </div>
             </div>
           </div>

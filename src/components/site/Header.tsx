@@ -18,6 +18,27 @@ export function Header({
 }) {
   const [isOpen, setIsOpen] = useState(false);
 
+  // Nav links point to sections (#solutions, etc.) that only exist in the
+  // "home" view. When the user is on the lease/demo view those anchors don't
+  // exist, so switch back to home first, then scroll to the target once it
+  // has rendered.
+  const handleNavClick = (e: any, href: string) => {
+    e?.preventDefault?.();
+    setIsOpen(false);
+    setActiveView?.("home");
+    const id = href.replace("#", "");
+    const scrollToTarget = (attempt = 0) => {
+      const el = document.getElementById(id);
+      if (el) {
+        el.scrollIntoView({ behavior: "smooth" });
+      } else if (attempt < 10) {
+        // Section not mounted yet — retry on the next frame.
+        requestAnimationFrame(() => scrollToTarget(attempt + 1));
+      }
+    };
+    requestAnimationFrame(() => scrollToTarget());
+  };
+
   const handleLeaseNowClick = (e: any) => {
     e?.preventDefault?.();
     setActiveView?.("lease");
@@ -38,7 +59,13 @@ export function Header({
     <header className="fixed top-0 left-0 right-0 z-50 backdrop-blur-md bg-background/70 border-b border-border">
       <div className="mx-auto max-w-7xl px-6 h-16 flex items-center justify-between">
         <Link to="/" className="flex items-center gap-2.5" onClick={() => setActiveView?.("home")}>
-          <img src={millenniumLogo} alt="Millennium" className="h-24 w-24" />
+          <div className="h-9 w-44 overflow-hidden">
+            <img
+              src={millenniumLogo}
+              alt="Millennium"
+              className="h-full w-full object-cover object-center"
+            />
+          </div>
         </Link>
 
         <nav className="hidden md:flex items-center gap-8">
@@ -46,6 +73,7 @@ export function Header({
             <a
               key={item.label}
               href={item.href}
+              onClick={(e) => handleNavClick(e, item.href)}
               className="text-sm text-muted-foreground hover:text-foreground transition-colors"
             >
               {item.label}
@@ -83,7 +111,7 @@ export function Header({
               <a
                 key={item.label}
                 href={item.href}
-                onClick={() => setIsOpen(false)}
+                onClick={(e) => handleNavClick(e, item.href)}
                 className="text-sm text-muted-foreground hover:text-foreground transition-colors"
               >
                 {item.label}
