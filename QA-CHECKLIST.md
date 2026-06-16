@@ -13,11 +13,16 @@ A walkthrough for testing the website before sign-off. Tick each box as you veri
 
 These were spotted while reading the source. Confirm whether they're intended before sign-off.
 
-- [ ] **Forms don't actually send anywhere.** The Lease, Book Demo, and Newsletter forms validate input, then _fake_ a submit (`setTimeout`) and show a success message — no email/backend. Any info a user enters is **lost**. Confirm with your mentor whether a real submission target (email, Formspree, API) is needed.
-- [/] **SEO description has typos:** "presentatiosn" and "confference room" (in the page `<head>` meta description). This shows in Google results.
-- [ ] **Dead footer links:** Privacy Policy, Terms of Service, Cookie Policy all point to `#` (go nowhere).
-- [ ] **Dead social links** in the footer point to `#`.
-- [ ] **Unresponsive Web Desigh**
+- [x] **Forms now send to a backend.** ~~Forms faked a submit.~~ RESOLVED: Lease, Book Demo, and Newsletter now POST to `/api/inquiry` → saved in Cloudflare D1 (`millennium-leads`) + emailed via Resend, protected by Turnstile. (Production email still pending: verify a real domain in Resend so mail lands in inbox, not spam, and can go to the mentor's real inbox — needs DNS access.)
+- [x] **Hero typos fixed.** ~~"presentatiosn" / "confference".~~ RESOLVED in the hero paragraph (`src/routes/index.tsx:1202-1203`). NOTE: these were in the visible hero text, NOT the `<head>` meta description (`index.tsx:65`), which was already correct — so they never showed in Google results.
+
+### Needs confirmation before fixing (dead `href="#"` links)
+
+- [ ] **Social icons** (`src/routes/index.tsx:2690`) — the 4 footer icons (Share2, AtSign, Hash, Play) all point to `#`. **Need the real social media URLs** (Facebook / LinkedIn / etc.). If no accounts exist, decide: remove the icons or leave as placeholder.
+- [ ] **Legal links** (`src/routes/index.tsx:2798-2800`) — Privacy Policy, Terms of Service, Cookie Policy all point to `#`. **Decide:** do these pages exist? Options: (a) create/host them and link, (b) remove the links, (c) leave placeholder. Linking to `#` is misleading on a live business site.
+- [ ] **Footer nav columns** (`src/routes/index.tsx:2815`, the `FooterCol` component) — every link in the footer columns (Company: About Us, Case Studies, Events, Careers, Partners, Contact, etc.) points to `#`. **Decide:** should each scroll to a section, go to a real page, or be removed?
+- [ ] **Unused component** (`src/components/blocks/galaxy-interactive-hero-section.tsx`) — has ~25 `href="#"` links but nothing imports/renders it. Harmless (not on the live site); could be deleted as cleanup.
+- [ ] **Unresponsive Web Desigh** (mobile responsiveness still pending)
 
 ---
 

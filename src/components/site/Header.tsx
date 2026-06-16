@@ -47,13 +47,15 @@ export function Header({
     } catch {}
   };
 
-  const handleBookDemoClick = (e: any) => {
-    e?.preventDefault?.();
-    setActiveView?.("demo");
-    try {
-      window.scrollTo({ top: 0, behavior: "smooth" });
-    } catch {}
-  };
+  // LEGACY: opened the in-app demo form view. Replaced by the external booking
+  // page (https://connectme-e783f.web.app/). Kept in case we revert.
+  // const handleBookDemoClick = (e: any) => {
+  //   e?.preventDefault?.();
+  //   setActiveView?.("demo");
+  //   try {
+  //     window.scrollTo({ top: 0, behavior: "smooth" });
+  //   } catch {}
+  // };
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 backdrop-blur-md bg-background/70 border-b border-border">
@@ -89,7 +91,16 @@ export function Header({
           >
             Lease Now
           </a>
+          {/* LEGACY in-app demo form trigger — kept in case we go back to it:
           <a href="#book-demo" onClick={handleBookDemoClick} className="btn-primary text-sm py-2 px-4">
+            Book Demo
+          </a> */}
+          <a
+            href="https://connectme-e783f.web.app/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="btn-primary text-sm py-2 px-4"
+          >
             Book Demo
           </a>
           <button

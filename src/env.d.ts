@@ -23,6 +23,7 @@ interface CloudflareEnv {
   DB: D1Database;
   RESEND_API_KEY?: string; // Resend API key (set via `wrangler secret put`)
   LEAD_NOTIFY_EMAIL?: string; // inbox that gets a notification per submission
+  TURNSTILE_SECRET_KEY?: string; // Cloudflare Turnstile secret (set via `wrangler secret put`)
 }
 
 declare module "cloudflare:workers" {
