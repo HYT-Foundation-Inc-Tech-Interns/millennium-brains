@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useRef, useState, type ReactNode } from "react";
+import { useEffect, useRef, useState, type FormEvent, type ReactNode } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import {
   Sparkles,
@@ -52,6 +52,7 @@ import { IntroOverlay } from "@/components/IntroOverlay";
 import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "@/components/ui/accordion";
 import { Progress } from "@/components/ui/progress";
 import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
+import { submitInquiry } from "@/lib/submit-inquiry";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -1679,6 +1680,8 @@ function ExperienceInnovation({
   const [packageOption, setPackageOption] = useState("");
   const [submitted, setSubmitted] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [leaseSubmitting, setLeaseSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
   const [leaseStep, setLeaseStep] = useState<1 | 2 | 3>(1);
   const leaseStepLabels = ["Your details", "Schedule", "Package & Review"];
 
@@ -1692,6 +1695,7 @@ function ExperienceInnovation({
   const [demoErrors, setDemoErrors] = useState<Record<string, string>>({});
   const [demoSubmitting, setDemoSubmitting] = useState(false);
   const [demoSubmitted, setDemoSubmitted] = useState(false);
+  const [demoSubmitError, setDemoSubmitError] = useState<string | null>(null);
   const [demoTermsChecked, setDemoTermsChecked] = useState(false);
 
   const closeAllDropdowns = () => {
@@ -2047,7 +2051,7 @@ function ExperienceInnovation({
 
                 {!submitted ? (
                   <form
-                    onSubmit={(e) => {
+                    onSubmit={async (e) => {
                       e.preventDefault();
                       // Final submit re-validates every step (same rules as before).
                       const nextErrors = {
@@ -2056,10 +2060,34 @@ function ExperienceInnovation({
                         ...getLeaseStepErrors(3),
                       };
                       setErrors(nextErrors);
+                      if (Object.keys(nextErrors).length > 0) return;
 
-                      if (Object.keys(nextErrors).length === 0) {
+                      setSubmitError(null);
+                      setLeaseSubmitting(true);
+                      try {
+                        await submitInquiry({
+                          type: "lease",
+                          name: fullName,
+                          email,
+                          phone,
+                          details: {
+                            address,
+                            date,
+                            ingress,
+                            egress,
+                            leaseType,
+                            boardSize,
+                            package: packageOption,
+                            estimatedPrice: getEstimatedPrice(),
+                          },
+                        });
                         setSubmitted(true);
-                        // TODO: wire to backend API
+                      } catch (err) {
+                        setSubmitError(
+                          err instanceof Error ? err.message : "Something went wrong. Please try again.",
+                        );
+                      } finally {
+                        setLeaseSubmitting(false);
                       }
                     }}
                     className="space-y-4"
@@ -2233,11 +2261,15 @@ function ExperienceInnovation({
                           Next <ArrowRight className="w-4 h-4" />
                         </button>
                       ) : (
-                        <button type="submit" disabled={!isFormValid()} className={`btn-primary flex-1 ${!isFormValid() ? "opacity-60 cursor-not-allowed" : ""}`}>
-                          REQUEST LEASE QUOTATION
+                        <button type="submit" disabled={!isFormValid() || leaseSubmitting} className={`btn-primary flex-1 ${!isFormValid() || leaseSubmitting ? "opacity-60 cursor-not-allowed" : ""}`}>
+                          {leaseSubmitting ? "Submitting..." : "REQUEST LEASE QUOTATION"}
                         </button>
                       )}
                     </div>
+
+                    {submitError ? (
+                      <div className="text-sm text-red-400 text-center">{submitError}</div>
+                    ) : null}
                   </form>
                 ) : (
                   <div className="p-6 text-center">
@@ -2287,7 +2319,7 @@ function ExperienceInnovation({
             {!demoSubmitted ? (
               <form
                 className="card-surface p-7 space-y-5 mt-8"
-                onSubmit={(e) => {
+                onSubmit={async (e) => {
                   e.preventDefault();
                   // final validation
                   const newErrors: Record<string, string> = {};
@@ -2308,10 +2340,17 @@ function ExperienceInnovation({
                   // require terms agreement for demo
                   if (!demoTermsChecked) return;
 
+                  setDemoSubmitError(null);
                   setDemoSubmitting(true);
-                  // emulate async submit
-                  setTimeout(() => {
-                    setDemoSubmitting(false);
+                  try {
+                    await submitInquiry({
+                      type: "demo",
+                      name: demoFullName,
+                      email: demoEmail,
+                      phone: demoPhone,
+                      company: demoCompany,
+                      details: { solution: demoSolution, message: demoMessage },
+                    });
                     setDemoSubmitted(true);
                     // clear form fields
                     setDemoFullName("");
@@ -2323,7 +2362,13 @@ function ExperienceInnovation({
                     setDemoErrors({});
                     closeAllDropdowns();
                     setDemoTermsChecked(false);
-                  }, 900);
+                  } catch (err) {
+                    setDemoSubmitError(
+                      err instanceof Error ? err.message : "Something went wrong. Please try again.",
+                    );
+                  } finally {
+                    setDemoSubmitting(false);
+                  }
                 }}
               >
                 <div>
@@ -2497,6 +2542,10 @@ function ExperienceInnovation({
                   )}
                 </button>
 
+                {demoSubmitError ? (
+                  <div className="text-sm text-red-400 text-center">{demoSubmitError}</div>
+                ) : null}
+
                 <p className="text-xs text-center text-muted-foreground">
                   By submitting this form, you agree to our privacy policy and terms of service.
                 </p>
@@ -2567,6 +2616,34 @@ function Field({
 /* ------------------------------ Footer ------------------------------- */
 
 function Footer() {
+  const [newsletterEmail, setNewsletterEmail] = useState("");
+  const [newsletterState, setNewsletterState] = useState<"idle" | "submitting" | "done" | "error">(
+    "idle",
+  );
+  const [newsletterError, setNewsletterError] = useState<string | null>(null);
+
+  const handleNewsletterSubmit = async (e: FormEvent) => {
+    e.preventDefault();
+    const email = newsletterEmail.trim();
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      setNewsletterState("error");
+      setNewsletterError("Please enter a valid email address.");
+      return;
+    }
+    setNewsletterError(null);
+    setNewsletterState("submitting");
+    try {
+      await submitInquiry({ type: "newsletter", email });
+      setNewsletterState("done");
+      setNewsletterEmail("");
+    } catch (err) {
+      setNewsletterState("error");
+      setNewsletterError(
+        err instanceof Error ? err.message : "Something went wrong. Please try again.",
+      );
+    }
+  };
+
   return (
     <footer className="border-t border-border bg-background relative">
       <div className="mx-auto max-w-7xl px-6 py-16">
@@ -2635,14 +2712,33 @@ function Footer() {
               Subscribe to our newsletter for the latest product updates and industry insights
             </p>
           </div>
-          <form className="flex gap-3" onSubmit={(e) => e.preventDefault()}>
-            <input
-              type="email"
-              placeholder="Enter your email"
-              className="flex-1 bg-input border border-border rounded-lg px-4 py-3 text-sm"
-            />
-            <button className="btn-primary">Subscribe</button>
-          </form>
+          <div>
+            {newsletterState === "done" ? (
+              <div className="text-sm text-foreground">
+                Thanks for subscribing — we'll keep you posted.
+              </div>
+            ) : (
+              <form className="flex gap-3" onSubmit={handleNewsletterSubmit}>
+                <input
+                  type="email"
+                  value={newsletterEmail}
+                  onChange={(e) => setNewsletterEmail(e.target.value)}
+                  placeholder="Enter your email"
+                  className="flex-1 bg-input border border-border rounded-lg px-4 py-3 text-sm"
+                />
+                <button
+                  type="submit"
+                  disabled={newsletterState === "submitting"}
+                  className={`btn-primary ${newsletterState === "submitting" ? "opacity-60 cursor-not-allowed" : ""}`}
+                >
+                  {newsletterState === "submitting" ? "..." : "Subscribe"}
+                </button>
+              </form>
+            )}
+            {newsletterError ? (
+              <div className="text-xs text-red-400 mt-2">{newsletterError}</div>
+            ) : null}
+          </div>
         </div>
 
         <div className="mt-12 pt-8 border-t border-border">

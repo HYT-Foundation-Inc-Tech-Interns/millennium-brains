@@ -22,5 +22,13 @@ export default defineConfig({
     define: {
       __VERCEL__: deployTarget === "vercel",
     },
+    build: {
+      rollupOptions: {
+        // `cloudflare:workers` is a workerd runtime built-in (used in
+        // src/routes/api/inquiry.ts to read the D1 binding). It isn't a real
+        // package, so keep it external and let the Worker resolve it at runtime.
+        external: ["cloudflare:workers"],
+      },
+    },
   },
 });
