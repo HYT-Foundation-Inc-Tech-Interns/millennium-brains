@@ -20,6 +20,7 @@ type TurnstileApi = {
       "expired-callback"?: () => void;
       "error-callback"?: () => void;
       theme?: "auto" | "light" | "dark";
+      appearance?: "always" | "execute" | "interaction-only";
     },
   ) => string;
   remove: (id: string) => void;
@@ -53,9 +54,12 @@ function loadScript(): Promise<void> {
 export function Turnstile({
   onVerify,
   onExpire,
+  appearance = "always",
 }: {
   onVerify: (token: string) => void;
   onExpire?: () => void;
+  /** "interaction-only" keeps the widget invisible unless a challenge is needed. */
+  appearance?: "always" | "execute" | "interaction-only";
 }) {
   const containerRef = useRef<HTMLDivElement>(null);
   const widgetIdRef = useRef<string | null>(null);
@@ -76,6 +80,7 @@ export function Turnstile({
       widgetIdRef.current = window.turnstile.render(containerRef.current, {
         sitekey: SITE_KEY,
         theme: "dark",
+        appearance,
         callback: (token) => onVerifyRef.current(token),
         "expired-callback": () => onExpireRef.current?.(),
         "error-callback": () => onExpireRef.current?.(),
@@ -93,7 +98,7 @@ export function Turnstile({
         widgetIdRef.current = null;
       }
     };
-  }, []);
+  }, [appearance]);
 
   if (!SITE_KEY) return null;
   return <div ref={containerRef} />;

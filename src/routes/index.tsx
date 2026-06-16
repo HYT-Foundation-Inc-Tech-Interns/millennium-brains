@@ -1199,8 +1199,8 @@ function Hero() {
           The Start of <span className="text-white">Modern Day Technology</span>
           </h1>
           <p className="mt-6 text-lg md:text-xl text-muted-foreground max-w-2xl leading-relaxed">
-            Millennium is a smart interactive board that can do presentatiosn in the classroom, the
-            confference room, in your home theater or anywhere that requires collaborative and
+            Millennium is a smart interactive board that can do presentations in the classroom, the
+            conference room, in your home theater or anywhere that requires collaborative and
             engaging presentations
           </p>
           <div className="mt-8 flex flex-wrap gap-4 items-center">
@@ -2760,7 +2760,11 @@ function Footer() {
                   </button>
                 </div>
                 {TURNSTILE_ENABLED ? (
-                  <Turnstile onVerify={setNewsletterToken} onExpire={() => setNewsletterToken(null)} />
+                  <Turnstile
+                    appearance="interaction-only"
+                    onVerify={setNewsletterToken}
+                    onExpire={() => setNewsletterToken(null)}
+                  />
                 ) : null}
               </form>
             )}
