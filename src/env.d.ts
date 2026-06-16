@@ -21,7 +21,8 @@ interface D1Database {
 // (e.g. secrets, KV) as they are introduced so `env.X` stays typed.
 interface CloudflareEnv {
   DB: D1Database;
-  // RESEND_API_KEY?: string;   // added in Layer 2 (email notifications)
+  RESEND_API_KEY?: string; // Resend API key (set via `wrangler secret put`)
+  LEAD_NOTIFY_EMAIL?: string; // inbox that gets a notification per submission
 }
 
 declare module "cloudflare:workers" {

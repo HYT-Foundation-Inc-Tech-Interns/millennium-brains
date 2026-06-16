@@ -24,6 +24,68 @@ function json(data: unknown, status = 200): Response {
   });
 }
 
+function escapeHtml(value: string): string {
+  return value
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+}
+
+// Build a readable HTML summary of the submission for the notification email.
+function buildEmailHtml(type: string, body: InquiryBody): string {
+  const rows: Array<[string, string]> = [
+    ["Type", type],
+    ["Name", body.name ?? "—"],
+    ["Email", body.email ?? "—"],
+    ["Phone", body.phone ?? "—"],
+    ["Company", body.company ?? "—"],
+  ];
+  for (const [key, val] of Object.entries(body.details ?? {})) {
+    rows.push([key, val == null ? "—" : String(val)]);
+  }
+  const cells = rows
+    .map(
+      ([k, v]) =>
+        `<tr><td style="padding:4px 12px 4px 0;color:#666;vertical-align:top">${escapeHtml(k)}</td>` +
+        `<td style="padding:4px 0">${escapeHtml(v)}</td></tr>`,
+    )
+    .join("");
+  return `<h2>New ${escapeHtml(type)} inquiry</h2><table style="font-family:sans-serif;font-size:14px">${cells}</table>`;
+}
+
+// Best-effort email notification via Resend. Never throws — if it fails, the
+// lead is already saved in D1, so we just log and move on.
+async function sendNotificationEmail(type: string, body: InquiryBody): Promise<void> {
+  const apiKey = env.RESEND_API_KEY;
+  const to = env.LEAD_NOTIFY_EMAIL;
+  if (!apiKey || !to) return; // not configured yet — skip silently
+
+  try {
+    const res = await fetch("https://api.resend.com/emails", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        "content-type": "application/json",
+      },
+      body: JSON.stringify({
+        // Resend test mode: sender must be onboarding@resend.dev and the
+        // recipient must be your own Resend account email until you verify a domain.
+        from: "Millennium Leads <onboarding@resend.dev>",
+        to: [to],
+        reply_to: body.email,
+        subject: `New ${type} inquiry${body.name ? ` — ${body.name}` : ""}`,
+        html: buildEmailHtml(type, body),
+      }),
+    });
+    if (!res.ok) {
+      console.error("Resend returned an error", res.status, await res.text());
+    }
+  } catch (err) {
+    console.error("Failed to send notification email", err);
+  }
+}
+
 export const Route = createFileRoute("/api/inquiry")({
   server: {
     handlers: {
@@ -73,6 +135,9 @@ export const Route = createFileRoute("/api/inquiry")({
           console.error("Failed to store inquiry", err);
           return json({ error: "Could not save your request. Please try again." }, 500);
         }
+
+        // Lead is saved; notifying by email is best-effort and won't block success.
+        await sendNotificationEmail(type, body);
 
         return json({ ok: true });
       },

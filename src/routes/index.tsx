@@ -1193,7 +1193,7 @@ function Hero() {
           <span className="chip">
             <Sparkles className="w-3.5 h-3.5 text-primary" /> Powered by Brains Infinite Innovation
             Inc.
-          </span>
+1          </span>
           <h1 className="mt-6 text-6xl md:text-7xl lg:text-8xl font-bold tracking-tight leading-[1.02]">
           The Start of <span className="text-white">Modern Day Technology</span>
           </h1>
