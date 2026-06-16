@@ -11,6 +11,8 @@ export type InquiryPayload = {
   company?: string;
   /** Type-specific extras (dates, package, message, …). Stored as JSON. */
   details?: Record<string, unknown>;
+  /** Cloudflare Turnstile token, verified server-side before saving. */
+  turnstileToken?: string;
 };
 
 export async function submitInquiry(payload: InquiryPayload): Promise<void> {

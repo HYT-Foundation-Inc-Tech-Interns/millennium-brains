@@ -53,6 +53,7 @@ import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "@/
 import { Progress } from "@/components/ui/progress";
 import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
 import { submitInquiry } from "@/lib/submit-inquiry";
+import { Turnstile, TURNSTILE_ENABLED } from "@/components/site/Turnstile";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -1682,6 +1683,7 @@ function ExperienceInnovation({
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [leaseSubmitting, setLeaseSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const [leaseToken, setLeaseToken] = useState<string | null>(null);
   const [leaseStep, setLeaseStep] = useState<1 | 2 | 3>(1);
   const leaseStepLabels = ["Your details", "Schedule", "Package & Review"];
 
@@ -1696,6 +1698,7 @@ function ExperienceInnovation({
   const [demoSubmitting, setDemoSubmitting] = useState(false);
   const [demoSubmitted, setDemoSubmitted] = useState(false);
   const [demoSubmitError, setDemoSubmitError] = useState<string | null>(null);
+  const [demoToken, setDemoToken] = useState<string | null>(null);
   const [demoTermsChecked, setDemoTermsChecked] = useState(false);
 
   const closeAllDropdowns = () => {
@@ -2070,6 +2073,7 @@ function ExperienceInnovation({
                           name: fullName,
                           email,
                           phone,
+                          turnstileToken: leaseToken ?? undefined,
                           details: {
                             address,
                             date,
@@ -2261,11 +2265,15 @@ function ExperienceInnovation({
                           Next <ArrowRight className="w-4 h-4" />
                         </button>
                       ) : (
-                        <button type="submit" disabled={!isFormValid() || leaseSubmitting} className={`btn-primary flex-1 ${!isFormValid() || leaseSubmitting ? "opacity-60 cursor-not-allowed" : ""}`}>
+                        <button type="submit" disabled={!isFormValid() || leaseSubmitting || (TURNSTILE_ENABLED && !leaseToken)} className={`btn-primary flex-1 ${!isFormValid() || leaseSubmitting || (TURNSTILE_ENABLED && !leaseToken) ? "opacity-60 cursor-not-allowed" : ""}`}>
                           {leaseSubmitting ? "Submitting..." : "REQUEST LEASE QUOTATION"}
                         </button>
                       )}
                     </div>
+
+                    {leaseStep === 3 ? (
+                      <Turnstile onVerify={setLeaseToken} onExpire={() => setLeaseToken(null)} />
+                    ) : null}
 
                     {submitError ? (
                       <div className="text-sm text-red-400 text-center">{submitError}</div>
@@ -2349,6 +2357,7 @@ function ExperienceInnovation({
                       email: demoEmail,
                       phone: demoPhone,
                       company: demoCompany,
+                      turnstileToken: demoToken ?? undefined,
                       details: { solution: demoSolution, message: demoMessage },
                     });
                     setDemoSubmitted(true);
@@ -2517,11 +2526,16 @@ function ExperienceInnovation({
                   <label htmlFor="demo_terms_agree" className="text-sm">I have read and agree to the Terms and Conditions.</label>
                 </div>
 
+                {TURNSTILE_ENABLED ? (
+                  <Turnstile onVerify={setDemoToken} onExpire={() => setDemoToken(null)} />
+                ) : null}
+
                 <button
                   type="submit"
-                  className={`btn-primary w-full ${(!demoFullName || !demoEmail || !demoPhone || !demoCompany || !demoSolution || !demoMessage || demoSubmitting || !demoTermsChecked) ? "opacity-60 cursor-not-allowed" : ""}`}
+                  className={`btn-primary w-full ${(!demoFullName || !demoEmail || !demoPhone || !demoCompany || !demoSolution || !demoMessage || demoSubmitting || !demoTermsChecked || (TURNSTILE_ENABLED && !demoToken)) ? "opacity-60 cursor-not-allowed" : ""}`}
                   disabled={
                     demoSubmitting ||
+                    (TURNSTILE_ENABLED && !demoToken) ||
                     !(
                       demoFullName.trim() &&
                       demoEmail.trim() &&
@@ -2621,6 +2635,7 @@ function Footer() {
     "idle",
   );
   const [newsletterError, setNewsletterError] = useState<string | null>(null);
+  const [newsletterToken, setNewsletterToken] = useState<string | null>(null);
 
   const handleNewsletterSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -2630,10 +2645,19 @@ function Footer() {
       setNewsletterError("Please enter a valid email address.");
       return;
     }
+    if (TURNSTILE_ENABLED && !newsletterToken) {
+      setNewsletterState("error");
+      setNewsletterError("Please complete the verification.");
+      return;
+    }
     setNewsletterError(null);
     setNewsletterState("submitting");
     try {
-      await submitInquiry({ type: "newsletter", email });
+      await submitInquiry({
+        type: "newsletter",
+        email,
+        turnstileToken: newsletterToken ?? undefined,
+      });
       setNewsletterState("done");
       setNewsletterEmail("");
     } catch (err) {
@@ -2718,21 +2742,26 @@ function Footer() {
                 Thanks for subscribing — we'll keep you posted.
               </div>
             ) : (
-              <form className="flex gap-3" onSubmit={handleNewsletterSubmit}>
-                <input
-                  type="email"
-                  value={newsletterEmail}
-                  onChange={(e) => setNewsletterEmail(e.target.value)}
-                  placeholder="Enter your email"
-                  className="flex-1 bg-input border border-border rounded-lg px-4 py-3 text-sm"
-                />
-                <button
-                  type="submit"
-                  disabled={newsletterState === "submitting"}
-                  className={`btn-primary ${newsletterState === "submitting" ? "opacity-60 cursor-not-allowed" : ""}`}
-                >
-                  {newsletterState === "submitting" ? "..." : "Subscribe"}
-                </button>
+              <form className="flex flex-col gap-3" onSubmit={handleNewsletterSubmit}>
+                <div className="flex gap-3">
+                  <input
+                    type="email"
+                    value={newsletterEmail}
+                    onChange={(e) => setNewsletterEmail(e.target.value)}
+                    placeholder="Enter your email"
+                    className="flex-1 bg-input border border-border rounded-lg px-4 py-3 text-sm"
+                  />
+                  <button
+                    type="submit"
+                    disabled={newsletterState === "submitting"}
+                    className={`btn-primary ${newsletterState === "submitting" ? "opacity-60 cursor-not-allowed" : ""}`}
+                  >
+                    {newsletterState === "submitting" ? "..." : "Subscribe"}
+                  </button>
+                </div>
+                {TURNSTILE_ENABLED ? (
+                  <Turnstile onVerify={setNewsletterToken} onExpire={() => setNewsletterToken(null)} />
+                ) : null}
               </form>
             )}
             {newsletterError ? (

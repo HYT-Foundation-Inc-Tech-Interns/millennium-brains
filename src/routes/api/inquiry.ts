@@ -12,6 +12,7 @@ type InquiryBody = {
   phone?: string;
   company?: string;
   details?: Record<string, unknown>;
+  turnstileToken?: string;
 };
 
 const VALID_TYPES = new Set(["lease", "demo", "newsletter"]);
@@ -22,6 +23,31 @@ function json(data: unknown, status = 200): Response {
     status,
     headers: { "content-type": "application/json" },
   });
+}
+
+// Verify a Cloudflare Turnstile token. If no secret is configured, verification
+// is skipped (returns true) so the forms keep working before keys are set up.
+async function verifyTurnstile(token: string | undefined, ip: string | null): Promise<boolean> {
+  const secret = env.TURNSTILE_SECRET_KEY;
+  if (!secret) return true; // not configured yet
+  if (!token) return false;
+
+  try {
+    const form = new FormData();
+    form.append("secret", secret);
+    form.append("response", token);
+    if (ip) form.append("remoteip", ip);
+
+    const res = await fetch("https://challenges.cloudflare.com/turnstile/v0/siteverify", {
+      method: "POST",
+      body: form,
+    });
+    const data = (await res.json()) as { success?: boolean };
+    return data.success === true;
+  } catch (err) {
+    console.error("Turnstile verification failed", err);
+    return false;
+  }
 }
 
 function escapeHtml(value: string): string {
@@ -105,6 +131,14 @@ export const Route = createFileRoute("/api/inquiry")({
         }
         if (!EMAIL_RE.test(email)) {
           return json({ error: "A valid email address is required." }, 400);
+        }
+
+        const humanVerified = await verifyTurnstile(
+          body.turnstileToken,
+          request.headers.get("CF-Connecting-IP"),
+        );
+        if (!humanVerified) {
+          return json({ error: "Verification failed. Please try again." }, 403);
         }
 
         const db = env.DB;
