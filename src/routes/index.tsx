@@ -1204,7 +1204,12 @@ function Hero() {
             engaging presentations
           </p>
           <div className="mt-8 flex flex-wrap gap-4 items-center">
-            <a href="#contact" className="btn-primary transform-gpu scale-105">
+            <a
+              href="https://connectme-e783f.web.app/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="btn-primary transform-gpu scale-105"
+            >
               Book Demo <ArrowRight className="w-4 h-4" />
             </a>
             <a href="#solutions" className="btn-ghost transform-gpu scale-105">
