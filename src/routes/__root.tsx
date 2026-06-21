@@ -10,6 +10,8 @@ import {
 
 import appCss from "../styles.css?url";
 import favicon from "@/assets/Logo Millennium Paltinum PNG.png";
+import { Header } from "@/components/site/Header";
+import { Footer } from "@/components/site/Footer";
 
 function NotFoundComponent() {
   return (
@@ -116,7 +118,24 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <Outlet />
+      <div className="relative min-h-screen overflow-hidden bg-background text-foreground">
+        {/* Shared page backdrop */}
+        <div aria-hidden="true" className="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
+          <img
+            src="/img/cover.jpg"
+            alt=""
+            className="absolute inset-0 h-full w-full object-cover opacity-35 brightness-[0.65] contrast-[1.05] blur-[1px]"
+          />
+          <div className="absolute inset-0 bg-black/70" />
+          <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(3,7,18,0.65)_0%,rgba(3,7,18,0.72)_35%,rgba(2,6,23,0.86)_100%)]" />
+        </div>
+
+        <Header />
+        <main className="relative z-10 pt-16">
+          <Outlet />
+        </main>
+        <Footer />
+      </div>
     </QueryClientProvider>
   );
 }

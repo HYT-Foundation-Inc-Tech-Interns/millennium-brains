@@ -9,9 +9,15 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as LeaseRouteImport } from './routes/lease'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ApiInquiryRouteImport } from './routes/api/inquiry'
 
+const LeaseRoute = LeaseRouteImport.update({
+  id: '/lease',
+  path: '/lease',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
@@ -25,32 +31,43 @@ const ApiInquiryRoute = ApiInquiryRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/lease': typeof LeaseRoute
   '/api/inquiry': typeof ApiInquiryRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/lease': typeof LeaseRoute
   '/api/inquiry': typeof ApiInquiryRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/lease': typeof LeaseRoute
   '/api/inquiry': typeof ApiInquiryRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/api/inquiry'
+  fullPaths: '/' | '/lease' | '/api/inquiry'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/api/inquiry'
-  id: '__root__' | '/' | '/api/inquiry'
+  to: '/' | '/lease' | '/api/inquiry'
+  id: '__root__' | '/' | '/lease' | '/api/inquiry'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  LeaseRoute: typeof LeaseRoute
   ApiInquiryRoute: typeof ApiInquiryRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/lease': {
+      id: '/lease'
+      path: '/lease'
+      fullPath: '/lease'
+      preLoaderRoute: typeof LeaseRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -70,6 +87,7 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  LeaseRoute: LeaseRoute,
   ApiInquiryRoute: ApiInquiryRoute,
 }
 export const routeTree = rootRouteImport
