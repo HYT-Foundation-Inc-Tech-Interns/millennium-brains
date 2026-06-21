@@ -1,9 +1,29 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { env } from "cloudflare:workers";
 
 // Server route: POST /api/inquiry
 // Validates a form submission and stores it in the D1 `leads` table.
 // Runs inside the same Cloudflare Worker that serves the site.
+
+// `cloudflare:workers` is a workerd runtime built-in. Importing it at the top
+// level breaks plain `vite dev` (and any non-Worker SSR), because the router
+// loads every route module during SSR. We load it lazily inside the handler so
+// the binding is only resolved in the real Worker; locally it returns {} and
+// the handler falls back to its "not configured" paths.
+type WorkerEnv = {
+  DB?: D1Database;
+  TURNSTILE_SECRET_KEY?: string;
+  RESEND_API_KEY?: string;
+  LEAD_NOTIFY_EMAIL?: string;
+};
+
+async function getWorkerEnv(): Promise<WorkerEnv> {
+  try {
+    const mod = await import("cloudflare:workers");
+    return (mod.env as WorkerEnv) ?? {};
+  } catch {
+    return {};
+  }
+}
 
 type InquiryBody = {
   type?: string;
@@ -27,7 +47,11 @@ function json(data: unknown, status = 200): Response {
 
 // Verify a Cloudflare Turnstile token. If no secret is configured, verification
 // is skipped (returns true) so the forms keep working before keys are set up.
-async function verifyTurnstile(token: string | undefined, ip: string | null): Promise<boolean> {
+async function verifyTurnstile(
+  token: string | undefined,
+  ip: string | null,
+  env: WorkerEnv,
+): Promise<boolean> {
   const secret = env.TURNSTILE_SECRET_KEY;
   if (!secret) return true; // not configured yet
   if (!token) return false;
@@ -82,7 +106,11 @@ function buildEmailHtml(type: string, body: InquiryBody): string {
 
 // Best-effort email notification via Resend. Never throws — if it fails, the
 // lead is already saved in D1, so we just log and move on.
-async function sendNotificationEmail(type: string, body: InquiryBody): Promise<void> {
+async function sendNotificationEmail(
+  type: string,
+  body: InquiryBody,
+  env: WorkerEnv,
+): Promise<void> {
   const apiKey = env.RESEND_API_KEY;
   const to = env.LEAD_NOTIFY_EMAIL;
   if (!apiKey || !to) return; // not configured yet — skip silently
@@ -133,9 +161,12 @@ export const Route = createFileRoute("/api/inquiry")({
           return json({ error: "A valid email address is required." }, 400);
         }
 
+        const env = await getWorkerEnv();
+
         const humanVerified = await verifyTurnstile(
           body.turnstileToken,
           request.headers.get("CF-Connecting-IP"),
+          env,
         );
         if (!humanVerified) {
           return json({ error: "Verification failed. Please try again." }, 403);
@@ -171,7 +202,7 @@ export const Route = createFileRoute("/api/inquiry")({
         }
 
         // Lead is saved; notifying by email is best-effort and won't block success.
-        await sendNotificationEmail(type, body);
+        await sendNotificationEmail(type, body, env);
 
         return json({ ok: true });
       },

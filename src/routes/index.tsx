@@ -1690,7 +1690,23 @@ function ExperienceInnovation({
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [leaseToken, setLeaseToken] = useState<string | null>(null);
   const [leaseStep, setLeaseStep] = useState<1 | 2 | 3>(1);
-  const leaseStepLabels = ["Your details", "Schedule", "Package & Review"];
+  // The wizard form stays hidden until the user picks a plan from the pricing
+  // table above. Selecting a plan reveals the form and scrolls to it.
+  const [planSelected, setPlanSelected] = useState(false);
+  const [leaseTermsChecked, setLeaseTermsChecked] = useState(false);
+  const leaseStepLabels = ["Your details", "Package & Schedule", "Terms & Conditions"];
+  // Ingress/egress (same-day setup & teardown times) only apply to the daily
+  // 5-hour rate. Longer packages (3/7 days, monthly, 6/12 months) just need a
+  // start date and get an auto-computed end date.
+  const isDailyRate = packageOption === "Daily Rate (5 Hours)";
+  // Lease length in days per package — counted as 1 month = 30 days, 1 year = 365 days.
+  const packageDurationDays: Record<string, number> = {
+    "3 Days": 3,
+    "7 Days": 7,
+    "Monthly Rate": 30,
+    "6 Months Contract": 180,
+    "12 Months Contract": 365,
+  };
 
   // Book Demo form state (separate from leasing form)
   const [demoFullName, setDemoFullName] = useState("");
@@ -1758,6 +1774,7 @@ function ExperienceInnovation({
     if (selectedShortTermSize) {
       setBoardSize(selectedShortTermSize);
       setLeaseType("short");
+      setPlanSelected(true);
     }
   }, [selectedShortTermSize]);
 
@@ -1765,6 +1782,7 @@ function ExperienceInnovation({
     if (selectedMonthlySize) {
       setBoardSize(selectedMonthlySize);
       setLeaseType("monthly");
+      setPlanSelected(true);
     }
   }, [selectedMonthlySize]);
 
@@ -1787,6 +1805,16 @@ function ExperienceInnovation({
     return "—";
   }
 
+  // End date = start date + the package's duration in days (e.g. 1 year = 365).
+  // Returns an ISO yyyy-mm-dd string, or "" if there's nothing to compute yet.
+  function getEndDate() {
+    const days = packageDurationDays[packageOption];
+    if (!date || !days) return "";
+    const d = new Date(`${date}T00:00:00`);
+    d.setDate(d.getDate() + days);
+    return d.toISOString().slice(0, 10);
+  }
+
   function formatTime12(t: string) {
     if (!t) return "—";
     const parts = t.split(":");
@@ -1800,12 +1828,9 @@ function ExperienceInnovation({
 
   function isFormValid() {
     if (!fullName.trim() || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email) || !phone.trim() || !date.trim() || !address.trim() || !leaseType || !boardSize || !packageOption) return false;
-    if (!ingress.trim() || !egress.trim()) return false;
-    const [ih, im] = ingress.split(":").map((v) => parseInt(v, 10) || 0);
-    const [eh, em] = egress.split(":").map((v) => parseInt(v, 10) || 0);
-    const iMinutes = ih * 60 + im;
-    const eMinutes = eh * 60 + em;
-    return eMinutes > iMinutes;
+    if (isDailyRate && (!ingress.trim() || !egress.trim())) return false;
+    if (!leaseTermsChecked) return false;
+    return true;
   }
 
   // Per-step validation for the lease wizard. Same rules as the submit handler,
@@ -1819,19 +1844,16 @@ function ExperienceInnovation({
       if (!address.trim()) e.address = "Full address is required.";
     }
     if (s === 2) {
-      if (!date.trim()) e.date = "Date is required.";
-      if (!ingress.trim()) e.ingress = "Ingress time is required.";
-      if (!egress.trim()) e.egress = "Egress time is required.";
-      if (ingress.trim() && egress.trim()) {
-        const [ih, im] = ingress.split(":").map((v) => parseInt(v, 10) || 0);
-        const [eh, em] = egress.split(":").map((v) => parseInt(v, 10) || 0);
-        if (eh * 60 + em <= ih * 60 + im) e.egress = "Egress time must be later than Ingress time.";
-      }
-    }
-    if (s === 3) {
+      // Plan (type + size) comes from the pricing table / change-plan dropdown.
       if (!leaseType) e.leaseType = "Lease type is required.";
       if (!boardSize) e.boardSize = "Smart board size is required.";
       if (!packageOption) e.packageOption = "Please select a package.";
+      if (!date.trim()) e.date = "Date is required.";
+      if (isDailyRate && !ingress.trim()) e.ingress = "Ingress time is required.";
+      if (isDailyRate && !egress.trim()) e.egress = "Egress time is required.";
+    }
+    if (s === 3) {
+      if (!leaseTermsChecked) e.terms = "Please accept the terms and conditions.";
     }
     return e;
   }
@@ -1853,6 +1875,8 @@ function ExperienceInnovation({
     setBoardSize(size);
     setPackageOption("");
     setErrors({});
+    setLeaseStep(1);
+    setPlanSelected(true);
     requestAnimationFrame(() => {
       leaseFormRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
     });
@@ -2042,18 +2066,37 @@ function ExperienceInnovation({
                 </div>
               </div>
 
-              {/* Leasing Inquiry Form */}
+              {/* Leasing Inquiry Form — revealed only after a plan is picked above */}
+              {planSelected ? (
               <div ref={leaseFormRef} className="card-surface p-6 mt-6 scroll-mt-24">
                 <div className="text-sm text-muted-foreground mb-4">Leasing Inquiry Form</div>
 
                 {!submitted && leaseType && boardSize ? (
-                  <div className="mb-4 flex items-center gap-2 rounded-lg border border-primary/40 bg-primary/5 px-4 py-3 text-sm">
+                  <div className="mb-4 flex flex-wrap items-center justify-between gap-3 rounded-lg border border-primary/40 bg-primary/5 px-4 py-3 text-sm">
                     <span>
                       Selected plan:{" "}
                       <span className="font-semibold text-foreground">
                         {leaseType === "short" ? "Short-Term Lease" : "Monthly Lease"} · {boardSize} Inches
                       </span>
                     </span>
+                    <label className="flex items-center gap-2 text-xs text-muted-foreground">
+                      <span className="whitespace-nowrap">Change plan</span>
+                      <select
+                        value={`${leaseType}-${boardSize}`}
+                        onChange={(e) => {
+                          const [t, s] = e.target.value.split("-") as ["short" | "monthly", "65" | "86"];
+                          setLeaseType(t);
+                          setBoardSize(s);
+                          setPackageOption("");
+                        }}
+                        className="bg-input border border-border rounded-lg px-3 py-2 text-sm text-foreground focus:bg-black focus:outline-none"
+                      >
+                        <option value="short-65">Short-Term · 65 Inches</option>
+                        <option value="short-86">Short-Term · 86 Inches</option>
+                        <option value="monthly-65">Monthly · 65 Inches</option>
+                        <option value="monthly-86">Monthly · 86 Inches</option>
+                      </select>
+                    </label>
                   </div>
                 ) : null}
 
@@ -2082,8 +2125,9 @@ function ExperienceInnovation({
                           details: {
                             address,
                             date,
-                            ingress,
-                            egress,
+                            endDate: isDailyRate ? "" : getEndDate(),
+                            ingress: isDailyRate ? ingress : "",
+                            egress: isDailyRate ? egress : "",
                             leaseType,
                             boardSize,
                             package: packageOption,
@@ -2151,64 +2195,9 @@ function ExperienceInnovation({
                       </div>
                     ) : null}
 
-                    {/* Step 2 — Schedule */}
+                    {/* Step 2 — Package */}
                     {leaseStep === 2 ? (
                       <div className="space-y-4">
-                        <div>
-                          <label className="text-sm font-medium flex items-center gap-2">
-                            <Calendar className="w-4 h-4 text-primary" /> Date <span className="text-xs text-muted-foreground ml-2">(DD/MM/YYYY)</span>
-                          </label>
-                          <input type="date" value={date} onChange={(e) => setDate(e.target.value)} className="mt-2 w-full bg-input border border-border rounded-lg px-4 py-3 text-sm" />
-                          {errors.date ? <div className="text-xs text-red-400 mt-1">{errors.date}</div> : null}
-                        </div>
-
-                        <div className="grid md:grid-cols-2 gap-4">
-                          <div>
-                            <label className="text-sm font-medium flex items-center gap-2 flex-wrap">
-                              <span className="flex items-center gap-2"><Clock className="w-4 h-4 text-primary" /> Ingress</span>
-                              <span className="text-xs font-normal text-muted-foreground">setup / arrival · e.g. 1:00 PM</span>
-                            </label>
-                            <input type="time" value={ingress} onChange={(e) => setIngress(e.target.value)} className="mt-2 w-full bg-input border border-border rounded-lg px-4 py-3 text-sm" />
-                            {errors.ingress ? <div className="text-xs text-red-400 mt-1">{errors.ingress}</div> : null}
-                          </div>
-
-                          <div>
-                            <label className="text-sm font-medium flex items-center gap-2 flex-wrap">
-                              <span className="flex items-center gap-2"><Clock className="w-4 h-4 text-primary" /> Egress</span>
-                              <span className="text-xs font-normal text-muted-foreground">teardown / departure · e.g. 6:00 PM</span>
-                            </label>
-                            <input type="time" value={egress} onChange={(e) => setEgress(e.target.value)} className="mt-2 w-full bg-input border border-border rounded-lg px-4 py-3 text-sm" />
-                            {errors.egress ? <div className="text-xs text-red-400 mt-1">{errors.egress}</div> : null}
-                          </div>
-                        </div>
-                      </div>
-                    ) : null}
-
-                    {/* Step 3 — Package & Review */}
-                    {leaseStep === 3 ? (
-                      <div className="space-y-4">
-                        <div className="grid md:grid-cols-2 gap-4">
-                          <div>
-                            <label className="text-sm font-medium">Lease Type</label>
-                            <select value={leaseType} onChange={(e) => { const v = e.target.value as "short" | "monthly" | ""; setLeaseType(v); setPackageOption(""); }} className="mt-2 w-full bg-input border border-border rounded-lg px-4 py-3 text-sm focus:bg-black focus:outline-none">
-                              <option value="">Select lease type</option>
-                              <option value="short">Short-Term Lease (Events / Conferences)</option>
-                              <option value="monthly">Monthly Lease (Organizations / Offices)</option>
-                            </select>
-                            {errors.leaseType ? <div className="text-xs text-red-400 mt-1">{errors.leaseType}</div> : null}
-                          </div>
-
-                          <div>
-                            <label className="text-sm font-medium">Smart Board Size</label>
-                            <select value={boardSize} onChange={(e) => setBoardSize(e.target.value as "65" | "86" | "")} className="mt-2 w-full bg-input border border-border rounded-lg px-4 py-3 text-sm focus:bg-black focus:outline-none">
-                              <option value="">Select size</option>
-                              <option value="65">65 Inches</option>
-                              <option value="86">86 Inches</option>
-                            </select>
-                            {errors.boardSize ? <div className="text-xs text-red-400 mt-1">{errors.boardSize}</div> : null}
-                          </div>
-                        </div>
-
                         <div>
                           <label className="text-sm font-medium">{leaseType === "monthly" ? "Contract Duration" : "Package"}</label>
                           <div className="mt-3 flex flex-wrap gap-2">
@@ -2237,6 +2226,52 @@ function ExperienceInnovation({
                           {errors.packageOption ? <div className="text-xs text-red-400 mt-1">{errors.packageOption}</div> : null}
                         </div>
 
+                        {packageOption ? (
+                          <>
+                            <div className={isDailyRate ? "" : "grid md:grid-cols-2 gap-4"}>
+                              <div>
+                                <label className="text-sm font-medium flex items-center gap-2">
+                                  <Calendar className="w-4 h-4 text-primary" /> {isDailyRate ? "Date" : "Start Date"} <span className="text-xs text-muted-foreground ml-2">(DD/MM/YYYY)</span>
+                                </label>
+                                <input type="date" value={date} onChange={(e) => setDate(e.target.value)} className="mt-2 w-full bg-input border border-border rounded-lg px-4 py-3 text-sm" />
+                                {errors.date ? <div className="text-xs text-red-400 mt-1">{errors.date}</div> : null}
+                              </div>
+
+                              {!isDailyRate ? (
+                                <div>
+                                  <label className="text-sm font-medium flex items-center gap-2">
+                                    <Calendar className="w-4 h-4 text-primary" /> End Date <span className="text-xs text-muted-foreground ml-2">(auto)</span>
+                                  </label>
+                                  <input type="date" value={getEndDate()} readOnly disabled className="mt-2 w-full bg-input border border-border rounded-lg px-4 py-3 text-sm opacity-70 cursor-not-allowed" />
+                                  <div className="text-xs text-muted-foreground mt-1">{packageOption} · {packageDurationDays[packageOption]} days from start date</div>
+                                </div>
+                              ) : null}
+                            </div>
+
+                            {isDailyRate ? (
+                              <div className="grid md:grid-cols-2 gap-4">
+                                <div>
+                                  <label className="text-sm font-medium flex items-center gap-2 flex-wrap">
+                                    <span className="flex items-center gap-2"><Clock className="w-4 h-4 text-primary" /> Ingress</span>
+                                    <span className="text-xs font-normal text-muted-foreground">setup / arrival · e.g. 1:00 PM</span>
+                                  </label>
+                                  <input type="time" value={ingress} onChange={(e) => setIngress(e.target.value)} className="mt-2 w-full bg-input border border-border rounded-lg px-4 py-3 text-sm" />
+                                  {errors.ingress ? <div className="text-xs text-red-400 mt-1">{errors.ingress}</div> : null}
+                                </div>
+
+                                <div>
+                                  <label className="text-sm font-medium flex items-center gap-2 flex-wrap">
+                                    <span className="flex items-center gap-2"><Clock className="w-4 h-4 text-primary" /> Egress</span>
+                                    <span className="text-xs font-normal text-muted-foreground">teardown / departure · e.g. 6:00 PM</span>
+                                  </label>
+                                  <input type="time" value={egress} onChange={(e) => setEgress(e.target.value)} className="mt-2 w-full bg-input border border-border rounded-lg px-4 py-3 text-sm" />
+                                  {errors.egress ? <div className="text-xs text-red-400 mt-1">{errors.egress}</div> : null}
+                                </div>
+                              </div>
+                            ) : null}
+                          </>
+                        ) : null}
+
                         <div className="card-surface p-4 rounded-lg border border-border">
                           <div className="font-semibold text-sm mb-2">LEASE SUMMARY</div>
                           <div className="text-sm text-muted-foreground">
@@ -2250,9 +2285,82 @@ function ExperienceInnovation({
                                 This is an estimate based on your selected size and package. Your final quotation is confirmed by our team and may vary with delivery, setup, or add-ons.
                               </InfoHint>
                             </div>
-                            <div>Ingress: <span className="text-foreground font-medium">{ingress ? formatTime12(ingress) : "—"}</span></div>
-                            <div>Egress: <span className="text-foreground font-medium">{egress ? formatTime12(egress) : "—"}</span></div>
+                            <div>{isDailyRate ? "Date" : "Start Date"}: <span className="text-foreground font-medium">{date || "—"}</span></div>
+                            {isDailyRate ? (
+                              <>
+                                <div>Ingress: <span className="text-foreground font-medium">{ingress ? formatTime12(ingress) : "—"}</span></div>
+                                <div>Egress: <span className="text-foreground font-medium">{egress ? formatTime12(egress) : "—"}</span></div>
+                              </>
+                            ) : (
+                              <div>End Date: <span className="text-foreground font-medium">{getEndDate() || "—"}</span></div>
+                            )}
                           </div>
+                        </div>
+                      </div>
+                    ) : null}
+
+                    {/* Step 3 — Terms & Conditions */}
+                    {leaseStep === 3 ? (
+                      <div className="space-y-4">
+                        <div className="card-surface p-4 rounded-lg border border-border">
+                          <div className="text-sm font-semibold text-foreground text-center">TERMS AND CONDITIONS</div>
+                          <div className="text-sm text-muted-foreground text-center mt-1">Review the leasing and payment policies before requesting your quotation.</div>
+                          <div className="mt-4 text-sm text-muted-foreground max-h-[36vh] overflow-y-auto pr-2">
+                            <div className="mt-2">
+                              <p className="font-semibold text-foreground mb-2">I. INCLUSIONS</p>
+                              <ul className="list-disc list-inside space-y-2 ml-2">
+                                <li>Delivery, setup, and basic orientation of the unit</li>
+                                <li>Technical support for the duration of the lease</li>
+                                <li>Standard stand/mount and required accessories</li>
+                              </ul>
+                            </div>
+                            <div className="mt-4">
+                              <p className="font-semibold text-foreground mb-2">II. RESERVATION POLICIES</p>
+                              <ul className="list-disc list-inside space-y-2 ml-2">
+                                <li>First-come, first-served basis.</li>
+                                <li>Reservations must be confirmed with a 50% downpayment.</li>
+                                <li>Bookings are accepted only during office hours, Monday to Saturday, 9:00am to 6:00pm. We are closed during holidays.</li>
+                                <li>Ocular inspections may be done only during office hours with prior notice and a scheduled appointment.</li>
+                                <li>A lessee should be of legal age, 18 years old and above. A lessee below 18 years old must be accompanied by an adult. For a corporation, only the authorized person/s should enter into a lease agreement.</li>
+                                <li>The lessee is responsible for the safekeeping of the unit throughout the lease period; any loss or damage beyond normal wear and tear will be charged accordingly.</li>
+                                <li>Ingress (setup / arrival) and egress (teardown / departure) schedules must be agreed upon in advance.</li>
+                              </ul>
+                            </div>
+                            <div className="mt-4">
+                              <p className="font-semibold text-foreground mb-2">III. PAYMENT</p>
+                              <ul className="list-disc list-inside space-y-2 ml-2">
+                                <li>For holiday deployments, a thirty percent (30%) surcharge shall be applied.</li>
+                                <li>A 50% down payment (DP) is required for any reservation worth P5,000.00 and above, payable upon booking confirmation. Based on our first-to-pay, first-to-be-served policy, a DP confirms your booking. Full payment is required prior to deployment.</li>
+                                <li>Bank transfer / online payment / direct payment accepted.</li>
+                                <li>Down payments can be done through:
+                                  <div className="ml-4 mt-1 text-sm space-y-1">
+                                    <p>Account name: Globaltronics, Inc.</p>
+                                    <p>Metrobank Account#: 361-402-1897</p>
+                                    <p>BDO Account#: 261-0008-941</p>
+                                    <p>GCash: <span className="text-blue-400">0917 5262762</span> Macy Guido</p>
+                                    <p>Please send a copy of the deposit slip/money transfer to <a href="mailto:mroxas@globaltronics.net" className="text-blue-400 hover:underline">mroxas@globaltronics.net</a>.</p>
+                                  </div>
+                                </li>
+                              </ul>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Agreement — required before requesting a quotation */}
+                        <div>
+                          <label className="flex items-start gap-3 text-sm">
+                            <input
+                              type="checkbox"
+                              checked={leaseTermsChecked}
+                              onChange={(e) => setLeaseTermsChecked(e.target.checked)}
+                              className="mt-0.5 h-4 w-4 shrink-0 accent-primary"
+                            />
+                            <span className="text-muted-foreground">
+                              I have read and agree to the{" "}
+                              <span className="font-medium text-foreground">Terms &amp; Conditions</span> and acknowledge that the estimated price is not a final quotation.
+                            </span>
+                          </label>
+                          {errors.terms ? <div className="text-xs text-red-400 mt-1">{errors.terms}</div> : null}
                         </div>
                       </div>
                     ) : null}
@@ -2293,6 +2401,7 @@ function ExperienceInnovation({
                   </div>
                 )}
               </div>
+              ) : null}
             </div>
           </div>
         ) : (
