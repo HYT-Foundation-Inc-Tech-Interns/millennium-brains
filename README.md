@@ -4,6 +4,7 @@ How to run the website locally.
 
 ## Prerequisites
 
+Please download:
 - [Node.js](https://nodejs.org/) (v18 or newer, includes npm)
 
 ## Steps
@@ -24,6 +25,15 @@ How to run the website locally.
    ```bash
    npm run dev
    ```
+   Alternatively, you may check a production server.
+   For that, you need the .env.local file, you may ask for it in the Telegram GC or ask in person.
+   Then, start the prod server:
+   ```bash
+   npm run build
+   npx wrangler dev --config dist/server/wrangler.json
+   ```
+   Then, ctrl+click the link it gives you. (It should be smth like http://localhost:8787)
+   
 5. Open the website in your browser:
    ```
    http://localhost:8080
@@ -33,6 +43,5 @@ How to run the website locally.
 ## Other commands
 
 - Build for production: `npm run build`
-- Preview the production build: `npm run preview`
 
 If the app is deployed and running properly, you may see it at https://millennium-brains.hytfoundationinterns-dreamacademy.workers.dev
