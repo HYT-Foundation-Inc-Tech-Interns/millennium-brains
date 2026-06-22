@@ -920,7 +920,7 @@ function VideoShowcase() {
   }, []);
 
   return (
-    <StarfieldSection className="py-24">
+    <StarfieldSection className="py-12">
       <div className="mx-auto max-w-7xl px-6">
         <SectionHeading
           chip={<span className="chip">Product Video</span>}
@@ -1052,23 +1052,55 @@ function Hero() {
       </div>
 
       <div
-        className="relative mx-auto w-full max-w-[1800px] px-[20px] py-20 md:py-28 gap-6 items-center"
-        style={{ zIndex: 3, display: "grid", gridTemplateColumns: "48% 48%" }}
+        className="relative mx-auto w-full max-w-[1800px] px-[20px] py-8 md:py-16 gap-6 items-center grid grid-cols-1 lg:grid-cols-[48%_48%]"
+        style={{ zIndex: 3 }}
       >
         <div className="pl-2">
           <span className="chip">
             <Sparkles className="w-3.5 h-3.5 text-primary" /> Powered by Brains Infinite Innovation
             Inc.
-1          </span>
-          <h1 className="mt-6 text-6xl md:text-7xl lg:text-8xl font-bold tracking-tight leading-[1.02]">
+          </span>
+          <h1 className="mt-6 text-6xl lg:text-8xl font-bold tracking-tight leading-[1.02]">
           The Start of <span className="text-white">Modern Day Technology</span>
           </h1>
-          <p className="mt-6 text-lg md:text-xl text-muted-foreground max-w-2xl leading-relaxed">
+          {/* for mobile */}
+          <div className="relative flex justify-end pr-[10px] lg:hidden scale-80 mt-10 md:mt-3" >
+          <div className="relative p-3 w-full">
+            <div className="relative aspect-[16/9] w-full scale-110">
+              <img
+                src={heroImg}
+                alt="Glowing circuit board"
+                width={1280}
+                height={896}
+                className="absolute inset-0 w-full h-full object-contain"
+              />
+            </div>
+            <div className="absolute -top-6 -right-7 card-surface px-4 py-3 flex items-center gap-3 scale-110 md:scale-160">
+              <div className="w-9 h-9 rounded-lg bg-gradient-brand grid place-items-center">
+                <Hd className="w-4 h-4 text-primary-foreground" />
+              </div>
+              <div className="text-xs">
+                <div className="text-muted-foreground">Display</div>
+                <div className="font-semibold">4k Ultra HD Display</div>
+              </div>
+            </div>
+            <div className="absolute -bottom-6 -left-7 card-surface px-4 py-3 flex items-center gap-3 scale-110 md:scale-160">
+              <div className="w-9 h-9 rounded-lg bg-gradient-brand grid place-items-center">
+                <Cpu className="w-4 h-4 text-primary-foreground" />
+              </div>
+              <div className="text-xs">
+                <div className="text-muted-foreground">Operating System</div>
+                <div className="font-semibold">Windows &amp; Android</div>
+              </div>
+            </div>
+          </div>
+        </div>
+          <p className="mt-6 text-lg md:text-xl text-muted-foreground lg:max-w-2xl leading-relaxed">
             Millennium is a smart interactive board that can do presentations in the classroom, the
             conference room, in your home theater or anywhere that requires collaborative and
-            engaging presentations
+            engaging presentations.
           </p>
-          <div className="mt-8 flex flex-wrap gap-4 items-center">
+          <div className="mt-4 lg:mt-8 flex flex-nowrap gap-4 items-center">
             <a
               href="https://connectme-e783f.web.app/"
               target="_blank"
@@ -1081,7 +1113,7 @@ function Hero() {
               Explore Solutions
             </a>
           </div>
-          <div ref={heroStatsRef} className="mt-14 grid grid-cols-3 gap-6 max-w-lg">
+          <div ref={heroStatsRef} className="mt-14 grid grid-cols-3 gap-6 max-w-lg max-lg:mx-auto">
             <div className="text-center">
               <Zap className="w-6 h-6 mx-auto text-primary" />
               <div className="mt-2 text-3xl md:text-4xl font-bold">{heroCounts[0]}+</div>
@@ -1100,7 +1132,7 @@ function Hero() {
           </div>
         </div>
 
-        <div className="relative flex justify-end pr-[10px]">
+        <div className="relative flex justify-end pr-[10px] hidden lg:flex justify-end md:-mt-20">
           <div className="relative p-3 w-full">
             <div className="relative aspect-[16/9] w-full origin-right scale-110">
               <img
@@ -1188,7 +1220,7 @@ function Trust() {
   }, [hasAnimated]);
 
   return (
-    <StarfieldSection className="py-24 ">
+    <StarfieldSection className="py-6 lg:py-12">
       <div ref={sectionRef} className="mx-auto max-w-7xl px-6 ">
         <SectionHeading
           chip={
@@ -1202,18 +1234,18 @@ function Trust() {
           subtitle="Serving enterprises, educational institutions, government agencies, and organizations worldwide"
         />
 
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-5">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 lg:gap-5">
           {stats.map((s, index) => {
             const rawValue = Number(s.value.replace(/\D/g, ""));
             const suffix = s.value.match(/\D+$/)?.[0] ?? "";
             const displayValue = `${counts[index] > 0 ? counts[index] : 0}${suffix}`;
 
             return (
-              <div key={s.label} className="card-surface p-6 text-center">
+              <div key={s.label} className="card-surface p-3 lg:p-6 text-center">
                 <div className="w-11 h-11 rounded-lg bg-primary/10 grid place-items-center mx-auto">
                   <s.icon className="w-5 h-5 text-primary" />
                 </div>
-                <div className="mt-4 text-3xl font-bold">
+                <div className="mt-2 lg:mt-4 text-2xl lg:text-3xl font-bold">
                   {hasAnimated ? `${rawValue}${suffix}` : displayValue}
                 </div>
                 <div className="text-sm text-muted-foreground mt-1">{s.label}</div>
@@ -1222,16 +1254,16 @@ function Trust() {
           })}
         </div>
 
-        <div className="mt-8 grid grid-cols-2 md:grid-cols-4 gap-5">
+        <div className="mt-4 lg:mt-8 grid grid-cols-2 md:grid-cols-4 gap-3 lg:gap-5">
           {partners.map((p) => {
             const Icon = p.icon;
 
             return (
-              <div key={p.name} className="card-surface p-6 text-center">
+              <div key={p.name} className="card-surface p-3 lg:p-6 text-center">
                 <div className="w-11 h-11 rounded-lg bg-secondary grid place-items-center mx-auto text-primary">
                   <Icon className="w-5 h-5" />
                 </div>
-                <div className="mt-4 font-semibold text-sm">{p.name}</div>
+                <div className="mt-2 lg:mt-4 font-semibold text-sm">{p.name}</div>
                 <div className="text-xs text-muted-foreground mt-1">{p.type}</div>
               </div>
             );
@@ -1246,7 +1278,7 @@ function Trust() {
 
 function Solutions() {
   return (
-    <StarfieldSection id="solutions" className="py-24 border-t border-border">
+    <StarfieldSection id="solutions" className="py-12 border-t border-border">
       <div className="mx-auto max-w-7xl px-6">
         <SectionHeading
           chip={
@@ -1259,11 +1291,11 @@ function Solutions() {
           subtitle="End-to-end digital transformation solutions tailored for education, enterprise, and institutional excellence"
         />
 
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
+        <div className="grid grid-cols-2 gap-3 lg:grid-cols-3 lg:gap-5">
           {solutions.map((s) => (
             <div
               key={s.title}
-              className="card-surface p-6 group hover:border-primary/30 transition-colors"
+              className="card-surface p-3 lg:p-6 group hover:border-primary/30 transition-colors"
             >
               <div
                 className={`w-12 h-12 rounded-xl bg-gradient-to-br ${s.grad} grid place-items-center text-white shadow-lg`}
@@ -1293,7 +1325,7 @@ function Products() {
   ];
 
   return (
-    <StarfieldSection id="product" className="py-24 border-t border-border">
+    <StarfieldSection id="product" className="py-12 border-t border-border">
       <div className="mx-auto max-w-7xl px-6">
         <SectionHeading
           chip={
@@ -1334,7 +1366,7 @@ function Products() {
           </div>
 
           <div className="flex flex-col h-full">
-            <div className="grid sm:grid-cols-2 gap-4 flex-1">
+            <div className="grid grid-cols-2 gap-4 flex-1">
               {productFeatures.map((f, index) => (
                 <div
                   key={f.title}
@@ -1363,7 +1395,7 @@ function Showcase() {
   const [active, setActive] = useState(environments[0].key);
   const env = environments.find((e) => e.key === active)!;
   return (
-    <StarfieldSection id="use-cases" className="py-24 border-t border-border">
+    <StarfieldSection id="use-cases" className="py-12 border-t border-border">
       <div className="mx-auto max-w-7xl px-6">
         <SectionHeading
           chip={
@@ -1467,7 +1499,7 @@ function Portfolio() {
   const filtered = projects.filter((p) => p.category === filter);
 
   return (
-    <StarfieldSection id="installations" className="py-24 border-t border-border">
+    <StarfieldSection id="installations" className="py-12 border-t border-border">
       <div className="mx-auto max-w-7xl px-6">
         <SectionHeading
           chip={
