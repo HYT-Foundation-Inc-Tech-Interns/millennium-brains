@@ -559,6 +559,38 @@ const projects = [
 // images below Meet Us at Industry Events
 const events = [
   {
+    type: "Conference",
+    title: "SOFTCON",
+    desc: "The biggest conference for the Philippine software industry, gathering business executives, software professionals, and project managers in one mega event. Delegates use the Millennium smart board to run live product demonstrations and collaborate on software roadmaps during the sessions.",
+    date: "October 28, 2026",
+    location: "Metro Manila, Philippines",
+    attendees: "1000+",
+    images: [
+      "/img/SOFTCON.jpg",
+      "/img/SOFTCON2.jpg",
+      "/img/SOFTCON3.jpg",
+      "/img/SOFTCON4.jpg",
+      "/img/SOFTCON5.jpg",
+      "/img/SOFTCON6.jpg",
+    ],
+  },
+  {
+    type: "Exposition",
+    title: "PMAX (PHILIPPINES MANUFACTURING & AUTOMATION EXPO)",
+    desc: "The country's premier manufacturing and automation exhibition showcases industrial robotics, smart production lines, and sensor integration solutions for the electronics, automotive, food, and pharmaceutical sectors. Plant managers use the Millennium smart board to review factory layouts and interactively streamline production workflows.",
+    date: "September 23-25, 2026",
+    location: "Pasay City, Philippines",
+    attendees: "5000+",
+    images: [
+      "/img/PMAX.jpg",
+      "/img/PMAX2.jpg",
+      "/img/PMAX3.jpg",
+      "/img/PMAX4.jpg",
+      "/img/PMAX5.jpg",
+      "/img/PMAX6.jpg",
+    ],
+  },
+  {
     type: "Military & History Museum",
     title: "ARMED FORCES OF THE PHILIPPINE MUSEUM",
     desc: "The Museum displays historical military hardware and artifacts to honor the bravery of Filipino soldiers. They use the Millennium smart board to display interactive combat timelines and vivid video documentaries for visiting students.",
